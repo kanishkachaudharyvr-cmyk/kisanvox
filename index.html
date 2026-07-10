@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KisanVox — Multilingual Light Dashboard & Voice Logistics Coordinator</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Outfit (Brand/Headers) & Inter (UI/Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            outfit: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              bg: '#f8fafc',
+              green: '#10b981', // Emerald Green
+              greenLight: '#34d399',
+              greenDark: '#064e3b',
+              accent: '#0ea5e9', // Sky Blue
+              slateDark: '#0f172a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #f4f6fa;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 40%),
+        radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.06) 0px, transparent 40%),
+        radial-gradient(at 50% 50%, rgba(16, 185, 129, 0.04) 0px, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    /* Light Glassmorphism Card Style */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(16, 185, 129, 0.12);
+      box-shadow: 0 10px 35px 0 rgba(15, 23, 42, 0.04);
+    }
+    
+    .glass-card-hover:hover {
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      box-shadow: 0 15px 45px 0 rgba(16, 185, 129, 0.08);
+    }
+
+    /* Mic recording ring animation */
+    @keyframes mic-ring-glow {
+      0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4), 0 0 12px rgba(16, 185, 129, 0.2);
+      }
+      70% {
+        box-shadow: 0 0 0 25px rgba(16, 185, 129, 0), 0 0 25px rgba(16, 185, 129, 0.4);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0), 0 0 12px rgba(16, 185, 129, 0.2);
+      }
+    }
+
+    .mic-recording-pulse {
+      animation: mic-ring-glow 1.5s infinite;
+    }
+
+    /* Waveform voice bars */
+    .bar {
+      width: 6px;
+      height: 8px;
+      background: linear-gradient(180deg, #10b981, #059669);
+      border-radius: 4px;
+      transition: height 0.1s ease;
+      animation: waveMotion 1s infinite ease-in-out alternate;
+    }
+    .bar:nth-child(2) { animation-delay: 0.15s; }
+    .bar:nth-child(3) { animation-delay: 0.3s; }
+    .bar:nth-child(4) { animation-delay: 0.45s; }
+    .bar:nth-child(5) { animation-delay: 0.2s; }
+    .bar:nth-child(6) { animation-delay: 0.35s; }
+    .bar:nth-child(7) { animation-delay: 0.1s; }
+
+    @keyframes waveMotion {
+      0% { height: 6px; }
+      100% { height: 45px; }
+    }
+
+    /* Receipt barcode lines */
+    .barcode-line {
+      height: 35px;
+      background-color: #0f172a;
+    }
+
+    /* Ticket Tear Effect */
+    .ticket-rip-light {
+      background-image: radial-gradient(circle, #f4f6fa 8px, transparent 9px);
+      background-size: 24px 24px;
+      background-position: -12px -12px;
+    }
+
+    /* Scroll/Load Animation */
+    .slide-in {
+      animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Simulated Map Route Animation */
+    @keyframes dash {
+      to {
+        stroke-dashoffset: -40;
+      }
+    }
+    .route-dashed {
+      stroke-dasharray: 8, 4;
+      animation: dash 3s linear infinite;
+    }
+    
+    @keyframes bounce-marker {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .marker-bounce {
+      animation: bounce-marker 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="text-slate-800 font-sans min-h-screen flex flex-col justify-between">
+
+  <!-- Header -->
+  <header class="border-b border-emerald-100 bg-white/80 backdrop-blur-md sticky top-0 z-50 transition-all duration-300 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-4">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3 self-start sm:self-center">
+        <div class="p-2.5 bg-emerald-50 border border-emerald-200 rounded-2xl shadow-sm hover:rotate-6 transition-transform duration-300">
+          <!-- Logo Icon -->
+          <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-2xl font-black font-outfit tracking-tight text-slate-900 flex items-center gap-1.5 leading-none">
+            <span id="txt-title">KisanVox</span>
+            <span class="bg-emerald-100 text-emerald-700 text-[10px] uppercase font-black tracking-wider px-2 py-0.5 border border-emerald-200 rounded-md">Live Agent</span>
+          </h1>
+          <p class="text-xs text-slate-500 font-medium mt-0.5" id="txt-tagline">Regional Voice-to-Logistics Supply Chain Assistant</p>
+        </div>
+      </div>
+
+      <!-- Language selector controls -->
+      <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end">
+        <div class="flex items-center gap-1 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+          <button onclick="changeLanguage('en')" id="lang-en" class="px-3 py-1.5 text-xs font-black rounded-xl bg-emerald-600 text-white shadow-sm transition duration-300 transform active:scale-95">EN</button>
+          <button onclick="changeLanguage('hi')" id="lang-hi" class="px-3 py-1.5 text-xs font-black rounded-xl text-slate-600 hover:text-slate-900 transition duration-300 transform active:scale-95">हिन्दी</button>
+          <button onclick="changeLanguage('mr')" id="lang-mr" class="px-3 py-1.5 text-xs font-black rounded-xl text-slate-600 hover:text-slate-900 transition duration-300 transform active:scale-95">मराठी</button>
+          <button onclick="changeLanguage('te')" id="lang-te" class="px-3 py-1.5 text-xs font-black rounded-xl text-slate-600 hover:text-slate-900 transition duration-300 transform active:scale-95">తెలుగు</button>
+          <button onclick="changeLanguage('pa')" id="lang-pa" class="px-3 py-1.5 text-xs font-black rounded-xl text-slate-600 hover:text-slate-900 transition duration-300 transform active:scale-95">ਪੰਜਾਬੀ</button>
+        </div>
+        <div class="hidden lg:flex items-center gap-1.5 text-[10px] text-emerald-800 font-black bg-emerald-50 px-3 py-1.5 border border-emerald-200 rounded-2xl">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="txt-statusActive">FastAPI & Antigravity SDK Active</span>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Metric Strip (Unique Dashboard Feature) -->
+  <section class="max-w-6xl mx-auto px-4 mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 slide-in" style="animation-delay: 0.05s;">
+    <!-- Metric 1 -->
+    <div class="glass-card rounded-2xl p-4 flex items-center justify-between border-l-4 border-l-emerald-500 transition-all duration-300 hover:shadow-md hover:scale-[1.01]">
+      <div>
+        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest" id="lbl-metricPrice">Mandi Price Index</span>
+        <h4 class="text-sm font-extrabold text-slate-800 mt-1 flex items-center gap-1">
+          🧅 Onion: <span class="text-emerald-600 font-black">₹2,550/q</span>
+        </h4>
+      </div>
+      <div class="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h.007v.008H3.75V4.5zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3 13.5h.008v.008H3V13.5zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM6 6h.008v.008H6V6zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+        </svg>
+      </div>
+    </div>
+    <!-- Metric 2 -->
+    <div class="glass-card rounded-2xl p-4 flex items-center justify-between border-l-4 border-l-sky-500 transition-all duration-300 hover:shadow-md hover:scale-[1.01]">
+      <div>
+        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest" id="lbl-metricLogistics">Logistics Coverage</span>
+        <h4 class="text-sm font-extrabold text-slate-800 mt-1">
+          Zone A: <span class="text-sky-600 font-black">12 Drivers Online</span>
+        </h4>
+      </div>
+      <div class="p-2 bg-sky-50 text-sky-600 rounded-xl">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124l-.317-5.11a2.25 2.25 0 00-2.203-2.116H18" />
+        </svg>
+      </div>
+    </div>
+    <!-- Metric 3 -->
+    <div class="glass-card rounded-2xl p-4 flex items-center justify-between border-l-4 border-l-amber-500 transition-all duration-300 hover:shadow-md hover:scale-[1.01]">
+      <div>
+        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest" id="lbl-metricStatus">System Dispatch Hub</span>
+        <h4 class="text-sm font-extrabold text-slate-800 mt-1">
+          Bookings: <span class="text-amber-600 font-black">Active Alerts Sent</span>
+        </h4>
+      </div>
+      <div class="p-2 bg-amber-50 text-amber-600 rounded-xl">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a9.049 9.049 0 01-5.137 0M9 21h6M12 3v1.5m0 15V21m-9-9h1.5m16.5 0H21m-1.5-5.625l-1.125 1.125M5.625 5.625l1.125 1.125m11.25 11.25l-1.125-1.125M5.625 18.375l1.125-1.125" />
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Body Workspace -->
+  <main class="max-w-6xl mx-auto px-4 py-6 flex-1 w-full grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+    
+    <!-- LEFT PANEL: Command & Voice Input Center -->
+    <div class="md:col-span-5 glass-card rounded-[32px] p-6 shadow-md flex flex-col justify-between gap-6 slide-in transition-all duration-300">
+      
+      <div class="w-full text-center">
+        <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest font-outfit" id="txt-voiceHeader">Voice Orchestration</span>
+        <h2 class="text-2xl font-black text-slate-900 mt-1" id="txt-micTitle">Order Dispatch Mic</h2>
+        <p class="text-xs text-slate-500 mt-1.5 max-w-[280px] mx-auto leading-relaxed" id="txt-micDesc">Tap, speak in your language (e.g. Marathi, Hindi, English), and let the agent work.</p>
+      </div>
+
+      <!-- MICROPHONE MAIN INTERFACE -->
+      <div class="flex flex-col items-center justify-center my-2 gap-4">
+        <div class="relative flex items-center justify-center">
+          <!-- Voice Visualizer Ring (active when recording) -->
+          <button 
+            id="mic-btn" 
+            type="button"
+            class="w-32 h-32 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white flex flex-col items-center justify-center gap-2 shadow-[0_10px_25px_rgba(16,185,129,0.25)] hover:shadow-[0_12px_35px_rgba(16,185,129,0.35)] transition-all duration-300 transform hover:scale-105 active:scale-95 border border-emerald-300/25 z-10"
+          >
+            <!-- Mic SVG -->
+            <svg id="mic-icon" class="w-12 h-12 transition-all duration-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+            </svg>
+            <!-- Stop SVG -->
+            <svg id="stop-icon" class="w-12 h-12 hidden transition-all duration-300" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+              <rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" />
+            </svg>
+            <span id="mic-btn-label" class="text-[9px] font-black tracking-widest uppercase font-outfit">Tap to Speak</span>
+          </button>
+        </div>
+
+        <!-- Waveform sound visualization -->
+        <div id="visualizer" class="flex items-center justify-center gap-2 h-10 opacity-0 transition-opacity duration-300">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
+      </div>
+
+      <!-- LIVE TRANSCRIPTION TEXT DISPLAY -->
+      <div class="w-full space-y-2">
+        <label class="text-[10px] text-slate-400 uppercase tracking-widest font-black" id="lbl-liveTranscript">Live Voice Transcription</label>
+        <div id="transcript-display-box" class="w-full min-h-[75px] max-h-[100px] bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs text-slate-600 font-semibold italic overflow-y-auto leading-relaxed shadow-inner">
+          <span id="transcript-placeholder" class="text-slate-400 not-italic">Transcription will appear here in real time as you speak...</span>
+          <span id="transcript-content" class="hidden"></span>
+        </div>
+      </div>
+
+      <!-- Preset and Custom Controls -->
+      <div class="w-full border-t border-slate-100 pt-4 flex flex-col gap-2.5">
+        <label class="text-[10px] text-slate-400 uppercase tracking-widest font-black" id="txt-presetsLabel">Test Presets / Text Manual Entry</label>
+        <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <button onclick="setPreset('onion')" class="whitespace-nowrap px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-xl text-[10px] text-emerald-700 font-black hover:bg-emerald-600 hover:text-white transition-all duration-300 transform active:scale-95 shadow-sm">🧅 Onions Nashik</button>
+          <button onclick="setPreset('tomato')" class="whitespace-nowrap px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-xl text-[10px] text-emerald-700 font-black hover:bg-emerald-600 hover:text-white transition-all duration-300 transform active:scale-95 shadow-sm">🍅 Tomatoes Pune</button>
+          <button onclick="setPreset('wheat')" class="whitespace-nowrap px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-xl text-[10px] text-emerald-700 font-black hover:bg-emerald-600 hover:text-white transition-all duration-300 transform active:scale-95 shadow-sm">🌾 Wheat Indore</button>
+        </div>
+        <div class="flex gap-2">
+          <input 
+            type="text" 
+            id="text-input" 
+            placeholder="Type a regional command..." 
+            class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-semibold"
+          />
+          <button 
+            onclick="submitTextQuery()" 
+            class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs transition-all duration-300 transform active:scale-95 shadow-md"
+            id="txt-sendBtn"
+          >
+            Send
+          </button>
+        </div>
+      </div>
+
+    </div>
+    
+    <!-- RIGHT PANEL: Dynamic Workspace (Simulated Map vs. Actual Receipt) -->
+    <div class="md:col-span-7 flex flex-col gap-6 slide-in" style="animation-delay: 0.1s;">
+      
+      <!-- LOGISTICS VOUCHER RECEIPT (Glow white styling) -->
+      <div id="receipt-container" class="hidden transform transition-all duration-500 scale-95 opacity-0 h-full">
+        <div class="bg-white text-slate-800 rounded-[32px] shadow-lg border border-slate-200 overflow-hidden relative flex flex-col justify-between h-full">
+          
+          <!-- Green Accent Strip -->
+          <div class="bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 h-3"></div>
+          
+          <!-- Content Wrap -->
+          <div class="p-6 pb-2 space-y-4 flex-1">
+            
+            <!-- Receipt Header -->
+            <div class="border-b border-dashed border-slate-200 pb-4 flex items-start justify-between">
+              <div>
+                <span class="text-[9px] uppercase font-black tracking-widest text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100" id="txt-receiptConfirmed">KisanVox Dispatch Confirmed</span>
+                <h3 class="text-2xl font-black font-outfit text-slate-900 mt-2" id="txt-receiptTitle">Logistics Receipt</h3>
+                <p class="text-[10px] font-bold text-slate-400 mt-0.5" id="receipt-date">Date: July 11, 2026</p>
+              </div>
+              <div class="text-right">
+                <span class="text-[9px] text-slate-400 uppercase block font-bold" id="txt-bookingIdLabel">Booking ID</span>
+                <span class="text-xs font-mono font-black text-slate-800" id="booking-id">KV-WF-83F21</span>
+              </div>
+            </div>
+            
+            <!-- Commodity and Quantity Info -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100 shadow-sm">
+                <span class="text-[10px] text-slate-400 uppercase font-black" id="txt-commodityLabel">Commodity</span>
+                <span class="text-base font-black text-slate-800 block mt-0.5" id="receipt-commodity">Onions</span>
+              </div>
+              <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100 shadow-sm">
+                <span class="text-[10px] text-slate-400 uppercase font-black" id="txt-quantityLabel">Quantity</span>
+                <span class="text-base font-black text-slate-800 block mt-0.5" id="receipt-quantity">85 Bags</span>
+              </div>
+            </div>
+
+            <!-- APMC Pricing Data -->
+            <div class="bg-emerald-50/50 border border-emerald-200 rounded-2xl p-4 shadow-sm hover:scale-[1.01] transition-transform duration-300">
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-[10px] text-emerald-800 uppercase font-black tracking-wider" id="txt-priceLabel">Optimal APMC Market Price</span>
+                  <span class="text-lg font-black text-emerald-800 block mt-0.5" id="receipt-price">Mumbai APMC @ ₹2,550/quintal</span>
+                </div>
+                <div class="p-2.5 bg-white border border-emerald-200 rounded-xl text-emerald-600 shadow-sm">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.214.19c1.077.95 2.884.9 3.984-.1c1.084-1 .99-2.695-.12-3.696L11.83 10.3c-1.07-.95-1.163-2.6-.2-3.6a2.612 2.612 0 013.93 0m-6 0h6" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Logistics Partner -->
+            <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex items-start gap-3.5 shadow-sm hover:scale-[1.01] transition-transform duration-300">
+              <div class="p-3 bg-white border border-slate-200 rounded-xl text-emerald-600 shadow-sm">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124l-.317-5.11a2.25 2.25 0 00-2.203-2.116H18" />
+                </svg>
+              </div>
+              <div class="flex-1">
+                <span class="text-[10px] text-slate-400 uppercase font-bold" id="txt-logisticsLabel">Matched Logistics Partner</span>
+                <span class="text-sm font-black text-slate-800 block mt-0.5" id="receipt-driver">Ramesh Chawla (Mahindra Bolero Pickup)</span>
+                <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-slate-500 font-bold">
+                  <span id="receipt-eta">ETA: 20 mins</span>
+                  <span id="receipt-phone">Phone: +91-98450-11223</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Summary Banner -->
+            <div class="bg-gradient-to-r from-emerald-800 to-emerald-950 rounded-2xl p-4 text-white shadow-sm border border-emerald-600/20">
+              <span class="text-[9px] uppercase tracking-widest text-emerald-300 font-black" id="txt-summaryLabel">Farmer Audio translation & Summary</span>
+              <p class="text-sm mt-1 leading-relaxed font-bold italic text-emerald-50" id="receipt-summary">
+                "कांदा वाहतूक बुक झाली आहे! 🧅 85 bags onions routed to Mumbai APMC (Vashi) at the best rate of ₹2,550/quintal."
+              </p>
+            </div>
+
+          </div>
+
+          <!-- Bottom barcode details & rip -->
+          <div>
+            <div class="px-6 flex items-center justify-between border-t border-slate-100 pt-3">
+              <div class="flex gap-0.5 items-center">
+                <div class="barcode-line w-1"></div>
+                <div class="barcode-line w-2"></div>
+                <div class="barcode-line w-0.5"></div>
+                <div class="barcode-line w-1.5"></div>
+                <div class="barcode-line w-1"></div>
+                <div class="barcode-line w-3"></div>
+                <div class="barcode-line w-0.5"></div>
+                <div class="barcode-line w-2"></div>
+                <div class="barcode-line w-1"></div>
+                <div class="barcode-line w-1.5"></div>
+                <div class="barcode-line w-0.5"></div>
+                <div class="barcode-line w-2"></div>
+              </div>
+              <button onclick="resetDashboard()" class="text-xs font-black text-slate-500 hover:text-emerald-600 transition flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+                <span>New Bookings</span>
+              </button>
+            </div>
+            <!-- Rip cut footer -->
+            <div class="h-6 w-full ticket-rip-light bg-slate-50 mt-2"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- INSTRUCTIONS UNIQUE MAP PLACEHOLDER -->
+      <div id="info-placeholder" class="glass-card rounded-[32px] p-6 shadow-md flex flex-col justify-between h-full relative overflow-hidden min-h-[480px]">
+        
+        <!-- Dashboard Welcome Details -->
+        <div class="space-y-2">
+          <span class="text-[10px] font-black text-emerald-600 uppercase tracking-widest" id="txt-terminalHeader">Live Logistics Terminal</span>
+          <h3 class="text-xl font-black text-slate-900" id="txt-terminalTitle">System Route Tracker</h3>
+          <p class="text-xs text-slate-500 leading-relaxed" id="txt-terminalDesc">
+            Please tap the mic and record your order, or use the test presets below. 
+            The AI Agent will automatically orchestrate checking rates, scheduling a vehicle, and booking the delivery.
+          </p>
+        </div>
+
+        <!-- SIMULATED ROUTING MAP (Unique visual dashboard element) -->
+        <div class="my-4 flex-1 bg-slate-100/70 border border-slate-200/80 rounded-2xl p-4 flex flex-col justify-between items-stretch shadow-inner relative overflow-hidden min-h-[220px]">
+          
+          <!-- Simulated Map Grid SVG -->
+          <svg class="absolute inset-0 w-full h-full text-slate-300" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                <rect width="20" height="20" fill="none" />
+                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.4" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+            
+            <!-- Custom map roads -->
+            <path id="map-route-path" d="M 20 180 Q 150 150 160 80 T 320 50" fill="none" stroke="#e2e8f0" stroke-width="8" stroke-linecap="round" />
+            <path id="map-route-dashed" d="M 20 180 Q 150 150 160 80 T 320 50" fill="none" stroke="#a7f3d0" stroke-width="4" stroke-linecap="round" class="route-dashed" />
+            
+            <!-- Farmer Hub Location Marker -->
+            <g id="map-src-marker" transform="translate(20, 180)">
+              <circle r="12" fill="#10b981" opacity="0.2" class="animate-ping" />
+              <circle r="6" fill="#10b981" />
+              <circle r="3" fill="#ffffff" />
+            </g>
+
+            <!-- APMC Destination Mandi Marker -->
+            <g id="map-dst-marker" transform="translate(320, 50)" class="marker-bounce">
+              <path d="M0 0 L-6 -10 A6 6 0 1 1 6 -10 Z" fill="#ef4444" />
+              <circle cx="0" cy="-10" r="2" fill="#ffffff" />
+            </g>
+          </svg>
+
+          <!-- Label overlays -->
+          <div class="relative flex justify-between w-full text-[10px] font-bold text-slate-500">
+            <span id="lbl-src-tag" class="bg-white/90 border border-slate-200 px-2 py-0.5 rounded-lg shadow-sm">📍 Farmer Farm (Rural)</span>
+            <span id="lbl-dst-tag" class="bg-white/90 border border-slate-200 px-2 py-0.5 rounded-lg shadow-sm">📍 APMC Mandi</span>
+          </div>
+
+          <!-- Bottom map status tag -->
+          <div class="relative flex justify-center w-full">
+            <span class="bg-white/90 border border-emerald-200 text-emerald-800 text-[10px] font-black px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5 animate-pulse">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              <span id="lbl-routeStatus">Waiting for dispatch command...</span>
+            </span>
+          </div>
+
+        </div>
+
+        <!-- AI Toolchain Legend -->
+        <div class="bg-white/40 border border-emerald-500/10 rounded-2xl p-3.5 space-y-2">
+          <span class="text-[9px] text-slate-400 uppercase tracking-widest font-black" id="txt-toolchainTitle">Active AI Toolchain</span>
+          <div class="grid grid-cols-1 gap-2 text-xs">
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-sm"></span>
+              <span class="text-slate-600 font-semibold" id="txt-tool1">Tool 1: APMC Pricing Engine (`check_market_prices`)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-sm"></span>
+              <span class="text-slate-600 font-semibold" id="txt-tool2">Tool 2: Local Truck Scheduler (`find_transit_logistics`)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-sm"></span>
+              <span class="text-slate-600 font-semibold" id="txt-tool3">Tool 3: Logistic Alert Hub (`trigger_workflow_alert`)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-emerald-100 bg-white py-4 text-center mt-12 shadow-inner">
+    <p class="text-[11px] text-slate-400 font-bold" id="txt-footerText">© 2026 KisanVox. Developed with google-antigravity Agent framework for high-efficiency rural supply chains.</p>
+  </footer>
+
+  <!-- Multilingual Translation Dictionary -->
+  <script>
+    const translations = {
+      en: {
+        title: "KisanVox",
+        tagline: "Regional Voice-to-Logistics Supply Chain Assistant",
+        statusActive: "FastAPI & Antigravity SDK Active",
+        voiceHeader: "Voice Orchestration",
+        micTitle: "Order Dispatch Mic",
+        micDesc: "Tap, speak in your language (e.g. Marathi, Hindi, English), and let the agent work.",
+        tapToSpeak: "Tap to Speak",
+        stopRecord: "Stop Record",
+        listening: "Listening... Speak now",
+        processing: "Processing text transcription...",
+        readyText: "System ready to record",
+        presetsLabel: "Test Presets / Text Manual Entry",
+        sendBtn: "Send",
+        placeholderInput: "Type a regional command...",
+        terminalHeader: "Live Logistics Terminal",
+        terminalTitle: "System Route Tracker",
+        terminalDesc: "Please tap the mic and record your order, or use the test presets below. The AI Agent will automatically orchestrate checking rates, scheduling a vehicle, and booking the delivery.",
+        toolchainTitle: "Active AI Toolchain",
+        tool1: "Tool 1: APMC Pricing Engine (check_market_prices)",
+        tool2: "Tool 2: Local Truck Scheduler (find_transit_logistics)",
+        tool3: "Tool 3: Logistic Alert Hub (trigger_workflow_alert)",
+        receiptConfirmed: "KisanVox Dispatch Confirmed",
+        receiptTitle: "Logistics Receipt",
+        bookingIdLabel: "Booking ID",
+        commodityLabel: "Commodity",
+        quantityLabel: "Quantity",
+        priceLabel: "Optimal APMC Market Price",
+        logisticsLabel: "Matched Logistics Partner",
+        summaryLabel: "Farmer Audio translation & Summary",
+        footerText: "© 2026 KisanVox. Developed with google-antigravity Agent framework for high-efficiency rural supply chains.",
+        metricPrice: "Mandi Price Index",
+        metricLogistics: "Logistics Coverage",
+        metricStatus: "System Dispatch Hub",
+        lblRoute: "Waiting for dispatch command...",
+        lblLiveTranscript: "Live Voice Transcription",
+        transcriptPlaceholder: "Transcription will appear here in real time as you speak...",
+        statusUploading: "Uploading regional audio to server...",
+        statusTranscribing: "Transcribing audio via Sarvam AI API...",
+        statusPlanning: "Executing Antigravity Agent task loop...",
+        statusRates: "Querying APMC mandi market pricing tools...",
+        statusLogistics: "Matching local logistics trucks and routes...",
+        statusAlerts: "Triggering workflow dispatch notifications...",
+        statusVoucher: "Generating logistics ticket voucher...",
+        statusSuccess: "Voucher created successfully! 🎉",
+        micError: "Mic Error! Please use Manual Presets."
+      },
+      hi: {
+        title: "किसानवॉक्स",
+        tagline: "क्षेत्रीय आवाज-से-रसद आपूर्ति श्रृंखला सहायक",
+        statusActive: "फ़ास्टएपीआई और एंटीग्रेविटी एसडीके सक्रिय",
+        voiceHeader: "आवाज समन्वय",
+        micTitle: "ऑर्डर भेजने का माइक",
+        micDesc: "टैप करें, अपनी क्षेत्रीय भाषा (जैसे मराठी, हिंदी, अंग्रेजी) में बोलें, और एजेंट को काम करने दें।",
+        tapToSpeak: "बोलने के लिए छुएं",
+        stopRecord: "रिकॉर्डिंग रोकें",
+        listening: "सुन रहा हूँ... कृपया बोलें",
+        processing: "अनुलेखन का प्रसंस्करण किया जा रहा है...",
+        readyText: "सिस्टम रिकॉर्डिंग के लिए तैयार है",
+        presetsLabel: "परीक्षण प्रीसेट / टेक्स्ट मैन्युअल प्रविष्टि",
+        sendBtn: "भेजें",
+        placeholderInput: "एक क्षेत्रीय निर्देश टाइप करें...",
+        terminalHeader: "लाइव रसद टर्मिनल",
+        terminalTitle: "सिस्टम रूट ट्रैकर",
+        terminalDesc: "कृपया माइक पर टैप करें और अपना ऑर्डर रिकॉर्ड करें, या नीचे दिए गए प्रीसेट का उपयोग करें। एआई एजेंट स्वचालित रूप से दरों की जांच, वाहन का समय निर्धारण और डिलीवरी की बुकिंग करेगा।",
+        toolchainTitle: "सक्रिय एआई उपकरण श्रृंखला",
+        tool1: "उपकरण 1: एपीएमसी मूल्य निर्धारण इंजन (check_market_prices)",
+        tool2: "उपकरण 2: स्थानीय ट्रक शेड्यूलर (find_transit_logistics)",
+        tool3: "उपकरण 3: रसद चेतावनी हब (trigger_workflow_alert)",
+        receiptConfirmed: "किसानवॉक्स प्रेषण की पुष्टि",
+        receiptTitle: "रसद रसीद",
+        bookingIdLabel: "बुकिंग आईडी",
+        commodityLabel: "वस्तु / फसल",
+        quantityLabel: "मात्रा",
+        priceLabel: "सर्वोत्तम एपीएमसी मंडी मूल्य",
+        logisticsLabel: "संबद्ध रसद भागीदार",
+        summaryLabel: "किसान आवाज अनुवाद और सारांश",
+        footerText: "© 2026 किसानवॉक्स। उच्च दक्षता वाली ग्रामीण आपूर्ति श्रृंखलाओं के लिए गूगल-एंटीग्रेविटी एजेंट फ्रेमवर्क के साथ विकसित।",
+        metricPrice: "मंडी मूल्य सूचकांक",
+        metricLogistics: "रसद कवरेज",
+        metricStatus: "सिस्टम डिस्पैच हब",
+        lblRoute: "प्रेषण निर्देश की प्रतीक्षा कर रहा है...",
+        lblLiveTranscript: "लाइव वॉयस ट्रांसक्रिप्शन",
+        transcriptPlaceholder: "जैसे ही आप बोलेंगे, ट्रांसक्रिप्शन वास्तविक समय में यहां दिखाई देगा...",
+        statusUploading: "सर्वर पर क्षेत्रीय ऑडियो अपलोड हो रहा है...",
+        statusTranscribing: "सर्वम एआई एपीआई के माध्यम से अनुवाद हो रहा है...",
+        statusPlanning: "एंटीग्रेविटी एजेंट टास्क लूप चल रहा है...",
+        statusRates: "एपीएमसी मंडी मूल्य निर्धारण उपकरणों की जांच...",
+        statusLogistics: "स्थानीय रसद ट्रकों और मार्गों का मिलान...",
+        statusAlerts: "कार्यप्रवाह प्रेषण सूचनाओं को ट्रिगर किया जा रहा है...",
+        statusVoucher: "रसद टिकट वाउचर तैयार किया जा रहा है...",
+        statusSuccess: "वाउचर सफलतापूर्वक बन गया! 🎉",
+        micError: "माइक त्रुटि! कृपया मैन्युअल प्रीसेट का उपयोग करें।"
+      },
+      mr: {
+        title: "किसानवॉक्स",
+        tagline: "प्रादेशिक आवाज-ते-लॉजिस्टिक पुरवठा साखळी सहाय्यक",
+        statusActive: "FastAPI आणि Antigravity SDK सक्रिय आहे",
+        voiceHeader: "ध्वनी समन्वय",
+        micTitle: "ऑर्डर बुकिंग माईक",
+        micDesc: "टॅप करा, तुमच्या प्रादेशिक भाषेत (उदा. मराठी, हिंदी, इंग्रजी) बोला आणि एजंटला काम करू द्या.",
+        tapToSpeak: "बोलण्यासाठी स्पर्श करा",
+        stopRecord: "रेकॉर्डिंग थांबवा",
+        listening: "ऐकत आहे... कृपया बोला",
+        processing: "मजकूर भाषांतर प्रक्रिया सुरू आहे...",
+        readyText: "सिस्टम रेकॉर्डिंगसाठी तयार आहे",
+        presetsLabel: "चाचणी प्रीसेट / मॅन्युअल मजकूर प्रविष्ट करा",
+        sendBtn: "पाठवा",
+        placeholderInput: "प्रादेशिक आदेश टाईप करा...",
+        terminalHeader: "थेट वाहतूक टर्मिनल",
+        terminalTitle: "सिस्टम मार्ग ट्रॅकर",
+        terminalDesc: "कृपया माईकवर टॅप करा आणि तुमची ऑर्डर रेकॉर्ड करा किंवा खालील प्रीसेट वापरा. AI एजंट स्वयंचलितपणे बाजारभाव तपासणी, वाहन बुकिंग आणि वाहतूक व्यवस्था करेल.",
+        toolchainTitle: "सक्रिय एआय टूलचेन",
+        tool1: "टूल १: एपीएमसी बाजारभाव इंजिन (check_market_prices)",
+        tool2: "टूल २: स्थानिक ट्रक शेड्यूलर (find_transit_logistics)",
+        tool3: "टूल ३: लॉजिस्टिक अलर्ट हब (trigger_workflow_alert)",
+        receiptConfirmed: "किसानवॉक्स बुकिंग निश्चित झाले",
+        receiptTitle: "वाहतूक पावती",
+        bookingIdLabel: "बुकिंग आयडी",
+        commodityLabel: "पीक / माल",
+        quantityLabel: "प्रमाण (मात्रा)",
+        priceLabel: "सर्वोत्तम एपीएमसी बाजारभाव",
+        logisticsLabel: "निश्चित वाहतूक भागीदार",
+        summaryLabel: "शेतकरी आवाज भाषांतर आणि सारांश",
+        footerText: "© २०२६ किसानवॉक्स. ग्रामीण पुरवठा साखळी सुलभतेसाठी गूगल-अँटीग्रॅव्हिटी एजंट फ्रेमवर्कसह विकसित.",
+        metricPrice: "बाजारभाव निर्देशांक",
+        metricLogistics: "वाहतूक उपलब्धता",
+        metricStatus: "सिस्टम डिस्पॅच हब",
+        lblRoute: "बुकिंग आदेशाची वाट पाहत आहे...",
+        lblLiveTranscript: "लाइव्ह आवाज रेकॉर्डिंग भाषांतर",
+        transcriptPlaceholder: "आपण बोलताच आपले बोलणे येथे टाईप होईल...",
+        statusUploading: "ऑडिओ सर्व्हरवर अपलोड होत आहे...",
+        statusTranscribing: "सर्वम एआई एपीआई द्वारे भाषांतर चालू आहे...",
+        statusPlanning: "अँटीग्रॅव्हिटी एजंट लूप चालू आहे...",
+        statusRates: "एपीएमसी बाजारभाव तपासणी चालू आहे...",
+        statusLogistics: "स्थानिक ट्रक आणि वाहतूक मार्गांचे नियोजन...",
+        statusAlerts: "वाहतूक अलर्ट पाठवले जात आहेत...",
+        statusVoucher: "वाहतूक पावती तयार केली जात आहे...",
+        statusSuccess: "वाहतूक पावती यशस्वीरित्या तयार झाली! 🎉",
+        micError: "माईक त्रुटी! कृपया मॅन्युअल प्रीसेट वापरा."
+      },
+      te: {
+        title: "కిసాన్‌వాక్స్",
+        tagline: "ప్రాంతీయ వాయిస్-టు-లాజిస్టిక్స్ సప్లై చైన్ అసిస్టెంట్",
+        statusActive: "FastAPI & Antigravity SDK యాక్టివ్‌గా ఉంది",
+        voiceHeader: "వాయిస్ ఆర్కెస్ట్రేషన్",
+        micTitle: "ఆర్డర్ డిస్పాచ్ మైక్",
+        micDesc: "నొక్కండి, మీ ప్రాంతీయ భాషలో (ఉదా. తెలుగు, హిందీ, ఇంగ్లీష్) మాట్లాడండి మరియు ఏజెంట్‌ను పని చేయనివ్వండి.",
+        tapToSpeak: "మాట్లాడటానికి నొక్కండి",
+        stopRecord: "రికార్డింగ్ ఆపు",
+        listening: "వింటోంది... మాట్లాడండి",
+        processing: "ట్రాన్స్క్రిప్షన్ ప్రాసెస్ చేయబడుతోంది...",
+        readyText: "సిస్టమ్ రికార్డింగ్‌కు సిద్ధంగా ఉంది",
+        presetsLabel: "పరీక్ష ప్రీసెట్లు / మాన్యువల్ టెక్స్ట్ ఎంట్రీ",
+        sendBtn: "పంపు",
+        placeholderInput: "ప్రాంతీయ ఆదేశాన్ని టైప్ చేయండి...",
+        terminalHeader: "లైవ్ లాజిస్టిక్స్ టెర్మినల్",
+        terminalTitle: "సిస్టమ్ రూట్ ట్రాకర్",
+        terminalDesc: "దయచేసి మైక్‌ని నొక్కి మీ ఆర్డర్‌ని రికార్డ్ చేయండి లేదా క్రింది ప్రీసెట్లను ఉపయోగించండి. AI ఏజెంట్ స్వయంచాలకంగా రేట్లను తనిఖీ చేస్తుంది, వాహనాన్ని షెడ్యూల్ చేస్తుంది మరియు డెలివరీని బుక్ చేస్తుంది.",
+        toolchainTitle: "యాక్టివ్ AI టూల్‌చైన్",
+        tool1: "టూల్ 1: APMC ధరల ఇంజిన్ (check_market_prices)",
+        tool2: "టూల్ 2: లోకల్ ట్రక్ షెడ్యూలర్ (find_transit_logistics)",
+        tool3: "టూల్ 3: లాజిస్టిక్ అలర్ట్ హబ్ (trigger_workflow_alert)",
+        receiptConfirmed: "కిసాన్‌వాక్స్ బుకింగ్ నిర్ధారించబడింది",
+        receiptTitle: "రవాణా రసీదు",
+        bookingIdLabel: "బుకింగ్ ID",
+        commodityLabel: "పంట / సరుకు",
+        quantityLabel: "పరిమాణం",
+        priceLabel: "ఉత్తమ APMC మార్కెట్ ధర",
+        logisticsLabel: "సరిపోలిన రవాణా భాగస్వామి",
+        summaryLabel: "రైతు వాయిస్ అనువాదం & సారాంశం",
+        footerText: "© 2026 కిసాన్‌వాక్స్. గ్రామీణ రవాణా సౌలభ్యం కోసం గూగుల్-యాంటీగ్రావిటీ ఏజెంట్ ఫ్రేమ్‌వర్క్‌తో అభివృద్ధి చేయబడింది.",
+        metricPrice: "మార్కెట్ ధరల సూచిక",
+        metricLogistics: "రవాణా లభ్యత",
+        metricStatus: "డిస్పాచ్ హబ్",
+        lblRoute: "బుకింగ్ ఆదేశం కొరకు వేచి ఉంది...",
+        lblLiveTranscript: "లైవ్ వాయిస్ అనువాదం",
+        transcriptPlaceholder: "మీరు మాట్లాడేటప్పుడు టెక్స్ట్ ఇక్కడ ప్రత్యక్షంగా కనిపిస్తుంది...",
+        statusUploading: "ఆడియో సర్వర్‌కు అప్‌లోడ్ అవుతోంది...",
+        statusTranscribing: "సర్వమ్ AI ద్వారా అనువాదం జరుగుతోంది...",
+        statusPlanning: "యాంటీగ్రావిటీ ఏజెంట్ టాస్క్ లూప్ నడుస్తోంది...",
+        statusRates: "APMC మార్కెట్ ధరలను తనిఖీ చేస్తోంది...",
+        statusLogistics: "స్థానిక ట్రక్కులు మరియు మార్గాలను సరిపోలుస్తోంది...",
+        statusAlerts: "రవాణా హెచ్చరికలను ట్రిగర్ చేస్తోంది...",
+        statusVoucher: "రవాణా రసీదును సృష్టిస్తోంది...",
+        statusSuccess: "రసీదు విజయవంతంగా సృష్టించబడింది! 🎉",
+        micError: "మైక్ లోపం! దయచేసి మాన్యువల్ ప్రీసెట్లను ఉపయోగించండి."
+      },
+      pa: {
+        title: "ਕਿਸਾਨਵੌਕਸ",
+        tagline: "ਖੇਤਰੀ ਆਵਾਜ਼-ਤੋਂ-ਲੌਜਿਸਟਿਕਸ ਸਪਲਾਈ ਚੇਨ ਸਹਾਇਕ",
+        statusActive: "FastAPI ਅਤੇ Antigravity SDK ਸਰਗਰਮ ਹੈ",
+        voiceHeader: "ਆਵਾਜ਼ ਤਾਲਮੇਲ",
+        micTitle: "ਆਰਡਰ ਬੁਕਿੰਗ ਮਾਈਕ",
+        micDesc: "ਟੈਪ ਕਰੋ, ਆਪਣੀ ਖੇਤਰੀ ਭਾਸ਼ਾ (ਜਿਵੇਂ ਪੰਜਾਬੀ, ਹਿੰਦੀ, ਅੰਗਰੇਜ਼ੀ) ਵਿੱਚ ਬੋਲੋ, ਅਤੇ ਏਜੰਟ ਨੂੰ ਕੰਮ ਕਰਨ ਦਿਓ।",
+        tapToSpeak: "ਬੋਲਣ ਲਈ ਟੈਪ ਕਰੋ",
+        stopRecord: "ਰਿਕਾਰਡਿੰਗ ਰੋਕੋ",
+        listening: "ਸੁਣ ਰਿਹਾ ਹੈ... ਕਿਰਪਾ ਕਰਕੇ ਬੋਲੋ",
+        processing: "ਟ੍ਰਾਂਸਕ੍ਰਿਪਸ਼ਨ ਪ੍ਰੋਸੈਸ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ...",
+        readyText: "ਸਿਸਟਮ ਰਿਕਾਰਡਿੰਗ ਲਈ ਤਿਆਰ ਹੈ",
+        presetsLabel: "ਟੈਸਟ ਪ੍ਰੀਸੈਟਸ / ਮੈਨੂਅਲ ਟੈਕਸਟ ਐਂਟਰੀ",
+        sendBtn: "ਭੇਜੋ",
+        placeholderInput: "ਖੇਤਰੀ ਕਮਾਂਡ ਟਾਈਪ ਕਰੋ...",
+        terminalHeader: "ਲਾਈਵ ਲੌਜਿਸਟਿਕਸ ਟਰਮੀਨਲ",
+        terminalTitle: "ਸਿਸਟਮ ਰੂਟ ਟ੍ਰੈਕਰ",
+        terminalDesc: "ਕਿਰਪਾ ਕਰਕੇ ਮਾਈਕ 'ਤੇ ਟੈਪ ਕਰੋ ਅਤੇ ਆਪਣਾ ਆਰਡਰ ਰਿਕਾਰਡ ਕਰੋ, ਜਾਂ ਹੇਠਾਂ ਦਿੱਤੇ ਪ੍ਰੀਸੈਟਸ ਦੀ ਵਰਤੋਂ ਕਰੋ। AI ਏਜੰਟ ਆਪਣੇ ਆਪ ਰੇਟਾਂ ਦੀ ਜਾਂਚ, ਵਾਹਨ ਦੀ ਸਮਾਂ-ਸਾਰਣੀ ਅਤੇ ਡਿਲਿਵਰੀ ਬੁੱਕ ਕਰੇਗਾ।",
+        toolchainTitle: "ਸਰਗਰਮ AI ਟੂਲਚੇਨ",
+        tool1: "ਟੂਲ 1: APMC ਕੀਮਤ ਇੰਜਣ (check_market_prices)",
+        tool2: "ਟੂਲ 2: ਸਥਾਨਕ ਟਰੱਕ ਸ਼ੈਡਿਊਲਰ (find_transit_logistics)",
+        tool3: "ਟੂਲ 3: ਲੌਜਿਸਟਿਕਸ ਅਲਰਟ ਹੱਬ (trigger_workflow_alert)",
+        receiptConfirmed: "ਕਿਸਾਨਵੌਕਸ ਬੁਕਿੰਗ ਦੀ ਪੁਸ਼ਟੀ ਹੋਈ",
+        receiptTitle: "ਲੌਜਿਸਟਿਕਸ ਰਸੀਦ",
+        bookingIdLabel: "ਬੁਕਿੰਗ ID",
+        commodityLabel: "ਫਸਲ / ਅਨਾਜ",
+        quantityLabel: "ਮਾਤਰਾ",
+        priceLabel: "ਵਧੀਆ APMC ਮੰਡੀ ਕੀਮਤ",
+        logisticsLabel: "ਮੇਲ ਖਾਂਦਾ ਲੌਜਿਸਟਿਕਸ ਭਾਗੀਦਾਰ",
+        summaryLabel: "ਕਿਸਾਨ ਆਵਾਜ਼ ਅਨੁਵਾਦ ਅਤੇ ਸਾਰਾਂਸ਼",
+        footerText: "© 2026 ਕਿਸਾਨਵੌਕਸ। ਪੇਂਡੂ ਸਪਲਾਈ ਚੇਨ ਦੀ ਸਹੂਲਤ ਲਈ ਗੂਗਲ-ਐਂਟੀਗ੍ਰੈਵਿਟੀ ਏਜੰਟ ਫਰੇਮਵਰਕ ਨਾਲ ਵਿਕਸਤ।",
+        metricPrice: "ਮੰਡੀ ਕੀਮਤ ਸੂਚਕਾਂਕ",
+        metricLogistics: "ਟਰੱਕ ਉਪਲਬਧਤਾ",
+        metricStatus: "ਸਿਸਟਮ ਡਿਸਪੈਚ ਹੱਬ",
+        lblRoute: "ਬੁਕਿੰਗ ਨਿਰਦੇਸ਼ਾਂ ਦੀ ਉਡੀਕ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ...",
+        lblLiveTranscript: "ਲਾਈਵ ਆਵਾਜ਼ ਟ੍ਰਾਂਸਕ੍ਰਿਪਸ਼ਨ",
+        transcriptPlaceholder: "ਜਿਵੇਂ ਹੀ ਤੁਸੀਂ ਬੋਲੋਗੇ, ਟ੍ਰਾਂਸਕ੍ਰਿਪਸ਼ਨ ਇੱਥੇ ਦਿਖਾਈ ਦੇਵੇਗਾ...",
+        statusUploading: "ਆਡੀਓ ਸਰਵਰ 'ਤੇ ਅਪਲੋਡ ਹੋ ਰਿਹਾ ਹੈ...",
+        statusTranscribing: "ਸਰਵਮ AI ਦੁਆਰਾ ਅਨੁਵਾਦ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ...",
+        statusPlanning: "ਐਂਟੀਗ੍ਰੈਵਿਟੀ ਏਜੰਟ ਟਾਸਕ ਲੂਪ ਚੱਲ ਰਿਹਾ ਹੈ...",
+        statusRates: "APMC ਮੰਡੀ ਦੀਆਂ ਕੀਮਤਾਂ ਦੀ ਜਾਂਚ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ...",
+        statusLogistics: "ਸਥਾਨਕ ਟਰੱਕਾਂ ਅਤੇ ਰੂਟਾਂ ਦਾ ਮੇਲ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ...",
+        statusAlerts: "ਲੌਜਿਸਟਿਕਸ ਅਲਰਟ ਭੇਜੇ ਜਾ ਰਹੇ ਹਨ...",
+        statusVoucher: "ਲੌਜਿਸਟਿਕਸ ਰਸੀਦ ਤਿਆਰ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ...",
+        statusSuccess: "ਰਸੀਦ ਸਫਲਤਾਪੂਰਵਕ ਤਿਆਰ ਕੀਤੀ ਗਈ! 🎉",
+        micError: "ਮਾਈਕ ਦੀ ਖਰਾਬੀ! ਕਿਰਪਾ ਕਰਕੇ ਮੈਨੂਅਲ ਪ੍ਰੀਸੈਟਸ ਦੀ ਵਰਤੋਂ ਕਰੋ।"
+      }
+    };
+
+    let currentLang = 'en';
+
+    function changeLanguage(lang) {
+      currentLang = lang;
+      const dict = translations[lang];
+      
+      // Document text elements
+      document.getElementById('txt-title').innerText = dict.title;
+      document.getElementById('txt-tagline').innerText = dict.tagline;
+      document.getElementById('txt-statusActive').innerText = dict.statusActive;
+      document.getElementById('txt-voiceHeader').innerText = dict.voiceHeader;
+      document.getElementById('txt-micTitle').innerText = dict.micTitle;
+      document.getElementById('txt-micDesc').innerText = dict.micDesc;
+      document.getElementById('txt-presetsLabel').innerText = dict.presetsLabel;
+      document.getElementById('txt-sendBtn').innerText = dict.sendBtn;
+      document.getElementById('text-input').placeholder = dict.placeholderInput;
+      document.getElementById('txt-terminalHeader').innerText = dict.terminalHeader;
+      document.getElementById('txt-terminalTitle').innerText = dict.terminalTitle;
+      document.getElementById('txt-terminalDesc').innerText = dict.terminalDesc;
+      document.getElementById('txt-toolchainTitle').innerText = dict.toolchainTitle;
+      document.getElementById('txt-tool1').innerText = dict.tool1;
+      document.getElementById('txt-tool2').innerText = dict.tool2;
+      document.getElementById('txt-tool3').innerText = dict.tool3;
+      
+      // Metrics titles
+      document.getElementById('lbl-metricPrice').innerText = dict.metricPrice;
+      document.getElementById('lbl-metricLogistics').innerText = dict.metricLogistics;
+      document.getElementById('lbl-metricStatus').innerText = dict.metricStatus;
+      document.getElementById('lbl-liveTranscript').innerText = dict.lblLiveTranscript;
+      
+      // Update dynamic route text if placeholder is active
+      if (infoPlaceholder.className.indexOf('hidden') === -1) {
+        document.getElementById('lbl-routeStatus').innerText = dict.lblRoute;
+      }
+      
+      // Receipt Label texts
+      document.getElementById('txt-receiptConfirmed').innerText = dict.receiptConfirmed;
+      document.getElementById('txt-receiptTitle').innerText = dict.receiptTitle;
+      document.getElementById('txt-bookingIdLabel').innerText = dict.bookingIdLabel;
+      document.getElementById('txt-commodityLabel').innerText = dict.commodityLabel;
+      document.getElementById('txt-quantityLabel').innerText = dict.quantityLabel;
+      document.getElementById('txt-priceLabel').innerText = dict.priceLabel;
+      document.getElementById('txt-logisticsLabel').innerText = dict.logisticsLabel;
+      document.getElementById('txt-summaryLabel').innerText = dict.summaryLabel;
+      document.getElementById('txt-footerText').innerText = dict.footerText;
+      
+      // Placeholder display updates
+      const tBox = document.getElementById('transcript-placeholder');
+      if (tBox && tBox.style.display !== 'none') {
+        tBox.innerText = dict.transcriptPlaceholder;
+      }
+
+      // Mic state labels
+      if (!isRecording) {
+        document.getElementById('mic-btn-label').innerText = dict.tapToSpeak;
+        document.getElementById('status-text').innerText = dict.readyText;
+      } else {
+        document.getElementById('mic-btn-label').innerText = dict.stopRecord;
+        document.getElementById('status-text').innerText = dict.listening;
+      }
+
+      // Highlight active lang pill
+      ['en', 'hi', 'mr', 'te', 'pa'].forEach(l => {
+        const btn = document.getElementById(`lang-${l}`);
+        if (l === lang) {
+          btn.className = "px-3 py-1.5 text-xs font-black rounded-xl bg-emerald-600 text-white shadow-sm transition duration-300 transform active:scale-95";
+        } else {
+          btn.className = "px-3 py-1.5 text-xs font-black rounded-xl text-slate-600 hover:text-slate-900 transition duration-300 transform active:scale-95";
+        }
+      });
+    }
+  </script>
+
+  <!-- Web Speech API Browser Transcription + Post Fetch Pipeline -->
+  <script>
+    let recognition;
+    let isRecording = false;
+    let finalTranscriptText = "";
+
+    const micBtn = document.getElementById('mic-btn');
+    const micIcon = document.getElementById('mic-icon');
+    const stopIcon = document.getElementById('stop-icon');
+    const micBtnLabel = document.getElementById('mic-btn-label');
+    const statusText = document.getElementById('status-text');
+    const visualizer = document.getElementById('visualizer');
+    
+    const transcriptPlaceholder = document.getElementById('transcript-placeholder');
+    const transcriptContent = document.getElementById('transcript-content');
+    
+    const receiptContainer = document.getElementById('receipt-container');
+    const infoPlaceholder = document.getElementById('info-placeholder');
+    const textInput = document.getElementById('text-input');
+
+    // Initialize Web Speech API
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      recognition.onstart = () => {
+        const dict = translations[currentLang];
+        isRecording = true;
+        finalTranscriptText = "";
+        
+        // UI Updates
+        micIcon.classList.add('hidden');
+        stopIcon.classList.remove('hidden');
+        micBtnLabel.innerText = dict.stopRecord;
+        micBtn.classList.remove('from-emerald-500', 'to-emerald-600');
+        micBtn.classList.add('from-red-500', 'to-red-600', 'mic-recording-pulse');
+        visualizer.classList.remove('opacity-0');
+        statusText.innerText = dict.listening;
+        
+        // Show empty dynamic text
+        transcriptPlaceholder.style.display = 'none';
+        transcriptContent.classList.remove('hidden');
+        transcriptContent.innerText = "...";
+      };
+
+      recognition.onresult = (event) => {
+        let interimTranscript = "";
+        let finalTranscript = "";
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+
+        finalTranscriptText = finalTranscript || interimTranscript;
+        transcriptContent.innerText = finalTranscriptText;
+      };
+
+      recognition.onend = () => {
+        const dict = translations[currentLang];
+        isRecording = false;
+        
+        micIcon.classList.remove('hidden');
+        stopIcon.classList.add('hidden');
+        micBtnLabel.innerText = dict.tapToSpeak;
+        micBtn.classList.add('from-emerald-500', 'to-emerald-600');
+        micBtn.classList.remove('from-red-500', 'to-red-600', 'mic-recording-pulse');
+        visualizer.classList.add('opacity-0');
+        statusText.innerText = dict.processing;
+
+        // Auto post transcript if anything was transcribed
+        if (finalTranscriptText.trim()) {
+          sendAudioToServer(new Blob(["audio_stub"], {type: "audio/wav"}), finalTranscriptText);
+        } else {
+          statusText.innerText = dict.readyText;
+          transcriptPlaceholder.style.display = 'block';
+          transcriptContent.classList.add('hidden');
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error", event);
+        stopRecording();
+        const dict = translations[currentLang];
+        statusText.innerText = dict.micError;
+      };
+
+    } else {
+      console.warn("This browser does not support the Web Speech API.");
+      statusText.innerText = "Web Speech API not supported. Using presets/text.";
+    }
+
+    micBtn.addEventListener('click', () => {
+      if (!recognition) {
+        alert("Your browser does not support Speech Recognition. Please use Chrome/Edge or type your command.");
+        return;
+      }
+
+      if (!isRecording) {
+        // Set speech recognition language based on UI Language selection
+        const langMap = {
+          en: 'en-IN',
+          hi: 'hi-IN',
+          mr: 'mr-IN',
+          te: 'te-IN',
+          pa: 'pa-IN'
+        };
+        recognition.lang = langMap[currentLang] || 'en-IN';
+        recognition.start();
+      } else {
+        recognition.stop();
+      }
+    });
+
+    function stopRecording() {
+      if (recognition && isRecording) {
+        recognition.stop();
+      }
+    }
+
+    function setPreset(crop) {
+      const presets = {
+        onion: "I have 85 bags of premium Nashik onions ready. Need a driver to dispatch them to Mumbai APMC immediately.",
+        tomato: "Need to send 120 crates of ripe tomatoes from Pune farm to Delhi market. Find best prices and book transport.",
+        wheat: "Need transport details for 5 tons of quality wheat from Indore APMC to Nagpur hub today."
+      };
+      textInput.value = presets[crop];
+      submitTextQuery();
+    }
+
+    function submitTextQuery() {
+      const queryText = textInput.value.trim();
+      const dict = translations[currentLang];
+      if (!queryText) {
+        statusText.innerText = dict.placeholderInput;
+        return;
+      }
+      
+      transcriptPlaceholder.style.display = 'none';
+      transcriptContent.classList.remove('hidden');
+      transcriptContent.innerText = queryText;
+
+      const dummyBlob = new Blob(["dummy audio"], { type: 'audio/wav' });
+      sendAudioToServer(dummyBlob, queryText);
+    }
+
+    async function sendAudioToServer(audioBlob, textPrompt = null) {
+      const dict = translations[currentLang];
+      statusText.innerText = dict.statusUploading;
+      
+      const statusStates = [
+        dict.statusTranscribing,
+        dict.statusPlanning,
+        dict.statusRates,
+        dict.statusLogistics,
+        dict.statusAlerts,
+        dict.statusVoucher
+      ];
+
+      let stateIdx = 0;
+      const statusInterval = setInterval(() => {
+        if (stateIdx < statusStates.length) {
+          statusText.innerText = statusStates[stateIdx];
+          stateIdx++;
+        }
+      }, 950);
+
+      const formData = new FormData();
+      formData.append("file", audioBlob, "recording.wav");
+      if (textPrompt) {
+        formData.append("custom_text_prompt", textPrompt);
+      }
+
+      try {
+        const response = await fetch('/api/voice-process', {
+          method: 'POST',
+          body: formData
+        });
+
+        clearInterval(statusInterval);
+
+        if (response.ok) {
+          const data = await response.json();
+          renderReceipt(data);
+          statusText.innerText = dict.statusSuccess;
+        } else {
+          const errorData = await response.json();
+          statusText.innerText = `Error: ${errorData.detail || 'Processing failed'}`;
+        }
+      } catch (err) {
+        clearInterval(statusInterval);
+        console.error(err);
+        statusText.innerText = "Network Error.";
+      }
+    }
+
+    const cityCoords = {
+      "Nashik": { x: 100, y: 190 },
+      "Pune": { x: 120, y: 220 },
+      "Mumbai": { x: 80, y: 200 },
+      "Indore": { x: 150, y: 150 },
+      "Kota": { x: 140, y: 110 },
+      "Nagpur": { x: 210, y: 180 },
+      "Agra": { x: 180, y: 80 },
+      "Delhi": { x: 170, y: 55 },
+      "Kolar": { x: 160, y: 290 },
+      "Amravati": { x: 180, y: 180 },
+      "Ahmedabad": { x: 75, y: 140 },
+      "Kolkata": { x: 300, y: 160 }
+    };
+
+    function updateMapRoute(sourceName, destName) {
+      const src = sourceName.replace(" APMC", "").replace(" Mandi", "").trim();
+      const dst = destName.replace(" APMC", "").replace(" Mandi", "").trim();
+      
+      const srcCoord = cityCoords[src] || cityCoords["Nashik"];
+      const dstCoord = cityCoords[dst] || cityCoords["Mumbai"];
+      
+      const srcMarker = document.getElementById('map-src-marker');
+      if (srcMarker) {
+        srcMarker.setAttribute('transform', `translate(${srcCoord.x}, ${srcCoord.y})`);
+      }
+      
+      const dstMarker = document.getElementById('map-dst-marker');
+      if (dstMarker) {
+        dstMarker.setAttribute('transform', `translate(${dstCoord.x}, ${dstCoord.y})`);
+      }
+      
+      const routePath = document.getElementById('map-route-path');
+      const routeDashed = document.getElementById('map-route-dashed');
+      
+      const midX = (srcCoord.x + dstCoord.x) / 2 + 30;
+      const midY = (srcCoord.y + dstCoord.y) / 2 - 30;
+      
+      const pathD = `M ${srcCoord.x} ${srcCoord.y} Q ${midX} ${midY} ${dstCoord.x} ${dstCoord.y}`;
+      
+      if (routePath) routePath.setAttribute('d', pathD);
+      if (routeDashed) routeDashed.setAttribute('d', pathD);
+      
+      document.getElementById('lbl-src-tag').innerText = `📍 ${src}`;
+      document.getElementById('lbl-dst-tag').innerText = `📍 ${dst}`;
+      
+      const dict = translations[currentLang];
+      document.getElementById('lbl-routeStatus').innerText = `Route: ${src} ➔ ${dst}`;
+    }
+
+    function renderReceipt(data) {
+      document.getElementById('receipt-commodity').innerText = data.commodity || "Not Specified";
+      document.getElementById('receipt-quantity').innerText = data.quantity || "Not Specified";
+      document.getElementById('receipt-price').innerText = data.optimal_market_price || "Not Checked";
+      
+      const driverText = data.transit_partner_status || "No Driver Matched";
+      document.getElementById('receipt-driver').innerText = driverText.split('|')[0].trim();
+      
+      let eta = "ETA: Not Specified";
+      let phone = "Phone: Not Specified";
+      if (driverText.includes('|')) {
+        const parts = driverText.split('|');
+        for (let part of parts) {
+          if (part.toLowerCase().includes('phone:')) phone = part.trim();
+          if (part.toLowerCase().includes('eta:')) eta = part.trim();
+        }
+      }
+      document.getElementById('receipt-eta').innerText = eta;
+      document.getElementById('receipt-phone').innerText = phone;
+      
+      document.getElementById('receipt-summary').innerText = data.regional_summary || "";
+      
+      const randomID = 'KV-WF-' + Math.floor(100000 + Math.random() * 900000);
+      document.getElementById('booking-id').innerText = randomID;
+      
+      const now = new Date();
+      document.getElementById('receipt-date').innerText = `${dictReceiptDate()}: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+
+      // Update interactive map positions dynamically based on actual response locations
+      if (data.source_location && data.destination_mandi) {
+        updateMapRoute(data.source_location, data.destination_mandi);
+      }
+
+      // Transition visibility
+      infoPlaceholder.classList.add('hidden');
+      receiptContainer.classList.remove('hidden');
+      setTimeout(() => {
+        receiptContainer.classList.remove('scale-95', 'opacity-0');
+        receiptContainer.classList.add('scale-100', 'opacity-100');
+      }, 50);
+    }
+
+    function dictReceiptDate() {
+      const dates = { en: "Date", hi: "दिनांक", mr: "दिनांक", te: "తేదీ", pa: "ਮਿਤੀ" };
+      return dates[currentLang] || "Date";
+    }
+
+    function resetDashboard() {
+      const dict = translations[currentLang];
+      receiptContainer.classList.remove('scale-100', 'opacity-100');
+      receiptContainer.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        receiptContainer.classList.add('hidden');
+        infoPlaceholder.classList.remove('hidden');
+        
+        // Reset transcript box
+        transcriptPlaceholder.style.display = 'block';
+        transcriptContent.classList.add('hidden');
+        transcriptContent.innerText = "";
+        textInput.value = "";
+        
+        statusText.innerText = dict.readyText;
+      }, 300);
+    }
+  </script>
+</body>
+</html>
