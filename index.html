@@ -44,21 +44,21 @@
 
   <style>
     body {
-      background-color: #020617;
+      background-color: #000000;
       background-image: 
-        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.1) 0px, transparent 40%),
-        radial-gradient(at 100% 100%, rgba(249, 115, 22, 0.06) 0px, transparent 40%),
-        radial-gradient(at 50% 50%, rgba(245, 158, 11, 0.05) 0px, transparent 50%);
+        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.06) 0px, transparent 40%),
+        radial-gradient(at 100% 100%, rgba(249, 115, 22, 0.03) 0px, transparent 40%),
+        radial-gradient(at 50% 50%, rgba(245, 158, 11, 0.02) 0px, transparent 50%);
       background-attachment: fixed;
       color: #f1f5f9;
     }
 
     .glass-card {
-      background: rgba(15, 23, 42, 0.55);
+      background: rgba(10, 10, 10, 0.7);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
     }
     
     .glass-card-hover:hover {
@@ -183,7 +183,7 @@
     }
   </style>
 </head>
-<body class="text-slate-100 font-sans min-h-screen flex flex-col font-medium bg-slate-950">
+<body class="text-slate-100 font-sans min-h-screen flex flex-col font-medium bg-black">
 
   <!-- ================= AUTH GATEWAY CONTAINER ================= -->
   <div id="auth-gateway" class="flex-grow flex items-center justify-center p-4">
@@ -272,10 +272,10 @@
 
 
   <!-- ================= MAIN APP CONTAINER ================= -->
-  <div id="main-app" class="hidden flex-grow flex flex-col xl:flex-row min-h-screen w-full bg-slate-950 text-slate-100">
+  <div id="main-app" class="hidden flex-grow flex flex-col xl:flex-row xl:h-screen xl:overflow-hidden w-full bg-black text-slate-100">
     
     <!-- Sidebar Navigation (Left Pane) -->
-    <aside class="w-full xl:w-64 bg-slate-900/90 text-slate-300 flex flex-col justify-between p-6 border-b xl:border-b-0 xl:border-r border-slate-800 shrink-0">
+    <aside class="w-full xl:w-64 bg-zinc-950/70 text-slate-300 flex flex-col justify-between p-6 border-b xl:border-b-0 xl:border-r border-slate-900 shrink-0">
       <div class="flex flex-col gap-8">
         <!-- Logo -->
         <div class="flex items-center gap-3">
@@ -336,7 +336,7 @@
     <main class="flex-grow flex flex-col p-4 md:p-6 overflow-y-auto max-w-7xl w-full">
       
       <!-- Header -->
-      <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-slate-800 pb-4">
+      <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 border-b border-slate-800 pb-3">
         <div>
           <h2 class="text-2xl font-outfit font-extrabold text-white tracking-tight">Command Center</h2>
           <p class="text-xs text-slate-400">Real-time agricultural logistics and price telemetry.</p>
@@ -364,11 +364,11 @@
       </header>
 
       <!-- Glanceable Wide KPI Grid -->
-      <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         <!-- Soil Moisture Card -->
-        <div class="glass-card rounded-3xl p-5 border border-emerald-500/10 shadow-lg shadow-emerald-950/5 flex flex-col justify-between min-h-[120px]">
+        <div class="glass-card rounded-3xl p-4.5 border border-emerald-500/10 shadow-lg shadow-emerald-950/5 flex flex-col justify-between min-h-[110px]">
           <span class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">SOIL MOISTURE</span>
-          <div class="flex items-baseline gap-2 my-2">
+          <div class="flex items-baseline gap-2 my-1">
             <span class="text-4xl md:text-5xl font-outfit font-black text-emerald-400 font-mono">42%</span>
             <span class="text-xs text-emerald-500 font-bold">Optimal</span>
           </div>
@@ -376,9 +376,9 @@
         </div>
 
         <!-- Mandi Index Card -->
-        <div class="glass-card rounded-3xl p-5 border border-amber-400/10 shadow-lg shadow-amber-950/5 flex flex-col justify-between min-h-[120px]">
+        <div class="glass-card rounded-3xl p-4.5 border border-amber-400/10 shadow-lg shadow-amber-950/5 flex flex-col justify-between min-h-[110px]">
           <span class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">MANDI INDEX</span>
-          <div class="flex items-baseline gap-2 my-2">
+          <div class="flex items-baseline gap-2 my-1">
             <span class="text-4xl md:text-5xl font-outfit font-black text-amber-300 font-mono">+12.4%</span>
             <span class="text-xs text-amber-400 font-bold font-mono">Onion</span>
           </div>
@@ -386,9 +386,9 @@
         </div>
 
         <!-- Active Trucks Card -->
-        <div class="glass-card rounded-3xl p-5 border border-orange-500/10 shadow-lg shadow-orange-950/5 flex flex-col justify-between min-h-[120px]">
+        <div class="glass-card rounded-3xl p-4.5 border border-orange-500/10 shadow-lg shadow-orange-950/5 flex flex-col justify-between min-h-[110px]">
           <span class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">ACTIVE TRUCKS</span>
-          <div class="flex items-baseline gap-2 my-2">
+          <div class="flex items-baseline gap-2 my-1">
             <span class="text-4xl md:text-5xl font-outfit font-black text-orange-400 font-mono">2</span>
             <span class="text-xs text-orange-400 font-bold">In Transit</span>
           </div>
@@ -396,9 +396,9 @@
         </div>
 
         <!-- Temperature Card -->
-        <div class="glass-card rounded-3xl p-5 border border-slate-800 shadow-lg flex flex-col justify-between min-h-[120px]">
+        <div class="glass-card rounded-3xl p-4.5 border border-slate-800 shadow-lg flex flex-col justify-between min-h-[110px]">
           <span class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">FIELD TEMPERATURE</span>
-          <div class="flex items-baseline gap-2 my-2">
+          <div class="flex items-baseline gap-2 my-1">
             <span class="text-4xl md:text-5xl font-outfit font-black text-sky-400 font-mono">28°C</span>
             <span class="text-xs text-sky-400 font-bold">Clear Sky</span>
           </div>
@@ -407,73 +407,73 @@
       </section>
 
       <!-- ================= DASHBOARD TAB ================= -->
-      <section id="tab-dashboard" class="tab-content flex flex-col gap-6">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <section id="tab-dashboard" class="tab-content flex flex-col gap-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <!-- Weather Advisory Details -->
-          <div class="glass-card rounded-3xl p-6 shadow-sm flex flex-col gap-4">
+          <div class="glass-card rounded-3xl p-5 shadow-sm flex flex-col gap-3">
             <h3 class="text-base font-outfit font-bold text-white flex items-center gap-2">
               <i class="fa-solid fa-cloud-sun text-emerald-400"></i>
               <span>Weather Advisory Alerts</span>
             </h3>
             
-            <div class="grid grid-cols-2 gap-3 text-center text-xs">
-              <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
-                <span class="text-slate-400 block mb-1">Humidity</span>
+            <div class="grid grid-cols-2 gap-2 text-center text-xs">
+              <div class="bg-slate-900/60 p-2.5 rounded-2xl border border-slate-800">
+                <span class="text-slate-400 block mb-0.5">Humidity</span>
                 <span class="text-base font-bold text-white">82%</span>
               </div>
-              <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
-                <span class="text-slate-400 block mb-1">Wind Speed</span>
+              <div class="bg-slate-900/60 p-2.5 rounded-2xl border border-slate-800">
+                <span class="text-slate-400 block mb-0.5">Wind Speed</span>
                 <span class="text-base font-bold text-white">12 km/h</span>
               </div>
-              <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
-                <span class="text-slate-400 block mb-1">Rain Chance</span>
+              <div class="bg-slate-900/60 p-2.5 rounded-2xl border border-slate-800">
+                <span class="text-slate-400 block mb-0.5">Rain Chance</span>
                 <span class="text-base font-bold text-emerald-400">10%</span>
               </div>
-              <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
-                <span class="text-slate-400 block mb-1">Sowing Index</span>
+              <div class="bg-slate-900/60 p-2.5 rounded-2xl border border-slate-800">
+                <span class="text-slate-400 block mb-0.5">Sowing Index</span>
                 <span class="text-base font-bold text-emerald-400">Excellent</span>
               </div>
             </div>
 
-            <p class="text-xs text-slate-300 bg-emerald-950/20 text-emerald-400 border border-emerald-500/20 p-3.5 rounded-2xl leading-relaxed">
-              <i class="fa-solid fa-triangle-exclamation mr-1.5 text-emerald-400"></i>
-              <strong>Advisory</strong>: Sowing conditions are optimal. Avoid heavy nitrogen spraying just before forecast evening rainfall to prevent nutrient runoff.
+            <p class="text-xs text-slate-300 bg-emerald-950/20 text-emerald-400 border border-emerald-500/20 p-3 rounded-xl leading-relaxed">
+              <i class="fa-solid fa-triangle-exclamation mr-1 text-emerald-400"></i>
+              <strong>Advisory</strong>: Sowing conditions are optimal. Avoid nitrogen spraying before rainfall.
             </p>
           </div>
 
           <!-- Planting Suggestions -->
-          <div class="glass-card rounded-3xl p-6 shadow-sm flex flex-col gap-4">
+          <div class="glass-card rounded-3xl p-5 shadow-sm flex flex-col gap-3">
             <h3 class="text-base font-outfit font-bold text-white flex items-center gap-2">
               <i class="fa-solid fa-seedling text-emerald-400"></i>
               <span>Crop Sowing Recommendations</span>
             </h3>
             
-            <div class="flex flex-col gap-3 text-xs">
-              <div class="border border-emerald-500/10 bg-emerald-500/5 rounded-2xl p-4 flex items-start gap-3">
+            <div class="flex flex-col gap-2.5 text-xs">
+              <div class="border border-emerald-500/10 bg-emerald-500/5 rounded-2xl p-3 flex items-start gap-2.5">
                 <span class="text-2xl mt-0.5">🧅</span>
                 <div>
                   <h4 class="font-bold text-white">Onion (Kharif Crop)</h4>
-                  <p class="text-slate-400 mt-1">Excellent soil moisture indices. High-modal prices expected in Mumbai APMC due to low domestic market stocks.</p>
+                  <p class="text-slate-400 mt-0.5">Excellent soil moisture indices. High-modal prices expected in Mumbai APMC due to low domestic market stocks.</p>
                 </div>
               </div>
-              <div class="border border-slate-800 bg-slate-900/40 rounded-2xl p-4 flex items-start gap-3">
+              <div class="border border-slate-800 bg-slate-900/40 rounded-2xl p-3 flex items-start gap-2.5">
                 <span class="text-2xl mt-0.5">🍅</span>
                 <div>
                   <h4 class="font-bold text-white">Tomato (Short Harvest)</h4>
-                  <p class="text-slate-400 mt-1">Sow early harvest tomato variety. Ideal 28-30 day lifecycle fits before early winter fluctuations. Check Kolar rates.</p>
+                  <p class="text-slate-400 mt-0.5">Sow early harvest tomato variety. Ideal 28-30 day lifecycle fits before early winter fluctuations. Check Kolar rates.</p>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- State Mandi Price Index -->
-          <div class="glass-card rounded-3xl p-6 shadow-sm flex flex-col gap-4">
+          <div class="glass-card rounded-3xl p-5 shadow-sm flex flex-col gap-3">
             <h3 class="text-base font-outfit font-bold text-white flex items-center gap-2">
               <i class="fa-solid fa-chart-line text-emerald-400"></i>
               <span>State Mandi Price Index</span>
             </h3>
             
-            <div class="flex flex-col gap-3.5 text-xs text-slate-300">
+            <div class="flex flex-col gap-3 text-xs text-slate-300">
               <div>
                 <div class="flex justify-between font-semibold mb-1">
                   <span>Mumbai Mandi Onion</span>
@@ -781,29 +781,29 @@
     </main>
 
     <!-- Persistent Utility Pane (Right Pane) -->
-    <aside class="w-full xl:w-[420px] bg-slate-900/60 border-t xl:border-t-0 xl:border-l border-slate-800/80 p-6 flex flex-col gap-6 shrink-0 overflow-y-auto">
+    <aside class="w-full xl:w-[420px] bg-zinc-950/60 border-t xl:border-t-0 xl:border-l border-slate-900/80 p-5 flex flex-col gap-4 shrink-0 overflow-y-auto">
       
       <!-- Voice Controller section -->
-      <div class="glass-card rounded-3xl p-6 flex flex-col items-center justify-center text-center shadow-lg relative overflow-hidden border border-slate-800">
-        <h3 class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-4 w-full text-left">Voice Assistant Cockpit</h3>
+      <div class="glass-card rounded-3xl p-5 flex flex-col items-center justify-center text-center shadow-lg relative overflow-hidden border border-slate-900">
+        <h3 class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-3 w-full text-left">Voice Assistant Cockpit</h3>
         
         <!-- Record Button & Waves -->
-        <div class="relative flex flex-col items-center justify-center mb-4">
+        <div class="relative flex flex-col items-center justify-center mb-3">
           <!-- Outer glow rings -->
-          <div id="mic-ring" class="absolute w-28 h-28 rounded-full border border-emerald-500/10 flex items-center justify-center transition-all"></div>
+          <div id="mic-ring" class="absolute w-24 h-24 rounded-full border border-emerald-500/10 flex items-center justify-center transition-all"></div>
           
           <!-- Mic Button -->
-          <button onclick="toggleVoiceRecording()" id="mic-btn" class="relative z-10 w-20 h-20 rounded-full bg-gradient-to-tr from-emerald-500 to-emerald-400 hover:from-emerald-600 hover:to-emerald-500 active:scale-95 transition-all text-white text-2xl flex items-center justify-center shadow-xl shadow-emerald-500/25">
+          <button onclick="toggleVoiceRecording()" id="mic-btn" class="relative z-10 w-16 h-16 rounded-full bg-gradient-to-tr from-emerald-500 to-emerald-400 hover:from-emerald-600 hover:to-emerald-500 active:scale-95 transition-all text-white text-xl flex items-center justify-center shadow-xl shadow-emerald-500/25">
             <i id="mic-icon" class="fa-solid fa-microphone"></i>
           </button>
         </div>
 
         <!-- Status labels -->
         <p id="record-status" class="text-sm font-bold text-white mb-0.5">Click to Speak</p>
-        <p id="record-lang" class="text-xs text-slate-400 mb-4">Listening in: <span class="text-emerald-400 font-bold font-outfit">English</span></p>
+        <p id="record-lang" class="text-xs text-slate-400 mb-3">Listening in: <span class="text-emerald-400 font-bold font-outfit">English</span></p>
 
         <!-- Dynamic Audio Waveform -->
-        <div id="audio-wave" class="hidden flex items-end justify-center gap-1 h-10 mb-4">
+        <div id="audio-wave" class="hidden flex items-end justify-center gap-1 h-8 mb-3">
           <div class="bar"></div>
           <div class="bar"></div>
           <div class="bar"></div>
@@ -814,14 +814,14 @@
         </div>
 
         <!-- Translation Fallback Preset Helper -->
-        <div class="w-full border-t border-slate-800 pt-4 flex flex-col gap-2">
-          <p class="text-[10px] font-bold text-slate-505 tracking-wider uppercase text-left">Demo Voice Presets</p>
-          <div class="flex flex-col gap-2 text-left text-xs">
-            <button onclick="injectVoicePreset('onion')" class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-850 hover:bg-emerald-500/10 hover:border-emerald-500/30 text-slate-300 flex items-center gap-2 transition-colors">
+        <div class="w-full border-t border-slate-900 pt-3 flex flex-col gap-1.5">
+          <p class="text-[10px] font-bold text-slate-500 tracking-wider uppercase text-left">Demo Voice Presets</p>
+          <div class="flex flex-col gap-1.5 text-left text-xs">
+            <button onclick="injectVoicePreset('onion')" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-900 hover:bg-emerald-500/10 hover:border-emerald-500/30 text-slate-300 flex items-center gap-2 transition-colors">
               <span class="text-base">🧅</span>
               <span class="truncate font-semibold">Onion (Nashik to Mumbai)</span>
             </button>
-            <button onclick="injectVoicePreset('wheat')" class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-850 hover:bg-emerald-500/10 hover:border-emerald-500/30 text-slate-300 flex items-center gap-2 transition-colors">
+            <button onclick="injectVoicePreset('wheat')" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-900 hover:bg-emerald-500/10 hover:border-emerald-500/30 text-slate-300 flex items-center gap-2 transition-colors">
               <span class="text-base">🌾</span>
               <span class="truncate font-semibold">Wheat (Indore to Nagpur)</span>
             </button>
@@ -830,36 +830,36 @@
       </div>
 
       <!-- Transcription Result Card -->
-      <div class="glass-card rounded-3xl p-5 shadow-sm flex flex-col border border-slate-800">
-        <h3 class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-3 flex items-center gap-2">
+      <div class="glass-card rounded-3xl p-4 shadow-sm flex flex-col border border-slate-900">
+        <h3 class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-2 flex items-center gap-2">
           <i class="fa-solid fa-quote-left text-emerald-400"></i>
           <span>Speech Transcription Override</span>
         </h3>
-        <textarea id="transcription-text" rows="2" class="w-full bg-slate-955/40 bg-slate-950/40 border border-slate-800 rounded-xl p-3 text-xs focus:outline-none focus:border-emerald-500 transition-colors text-slate-200 leading-relaxed resize-none font-medium" placeholder="Transcribed text will appear here. You can manually edit it if needed."></textarea>
-        <button onclick="submitTextOrder()" class="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-95 transition-all text-white font-bold py-2.5 rounded-xl text-xs mt-3 flex items-center justify-center gap-2">
+        <textarea id="transcription-text" rows="2" class="w-full bg-slate-950/40 border border-slate-900 rounded-xl p-2.5 text-xs focus:outline-none focus:border-emerald-500 transition-colors text-slate-200 leading-relaxed resize-none font-medium" placeholder="Transcribed text will appear here. You can manually edit it if needed."></textarea>
+        <button onclick="submitTextOrder()" class="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-95 transition-all text-white font-bold py-2 rounded-xl text-xs mt-2.5 flex items-center justify-center gap-2">
           <span>Process & Book Order</span>
           <i class="fa-solid fa-circle-check"></i>
         </button>
       </div>
 
       <!-- Live Leaflet India Map -->
-      <div class="glass-card rounded-3xl p-5 shadow-lg flex flex-col border border-slate-800">
-        <div class="flex justify-between items-center mb-3">
+      <div class="glass-card rounded-3xl p-4 shadow-lg flex flex-col border border-slate-900">
+        <div class="flex justify-between items-center mb-2">
           <div>
             <h3 class="text-xs font-bold text-slate-400 tracking-wider uppercase">Live Route Map</h3>
           </div>
-          <div class="bg-emerald-955/30 bg-emerald-950/30 px-2 py-0.5 rounded-lg text-[9px] text-emerald-400 font-bold border border-emerald-500/20 flex items-center gap-1.5">
+          <div class="bg-emerald-950/30 px-2 py-0.5 rounded-lg text-[9px] text-emerald-400 font-bold border border-emerald-500/20 flex items-center gap-1.5">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
             <span id="route-indicator-label" class="font-mono">GPS Idle</span>
           </div>
         </div>
 
         <!-- Map Container -->
-        <div id="map" class="h-[240px] w-full rounded-2xl border border-slate-850 shadow-inner z-0"></div>
+        <div id="map" class="h-[210px] w-full rounded-2xl border border-slate-900 shadow-inner z-0"></div>
       </div>
 
       <!-- Emergency Weather Ticker -->
-      <div class="border border-orange-500/20 bg-orange-500/5 p-4 rounded-3xl text-xs leading-relaxed flex gap-3 text-orange-400">
+      <div class="border border-orange-500/20 bg-orange-500/5 p-3 rounded-2xl text-xs leading-relaxed flex gap-2.5 text-orange-400">
         <span class="text-base"><i class="fa-solid fa-triangle-exclamation"></i></span>
         <div>
           <span class="font-bold block mb-0.5">Logistics Advisory</span>
