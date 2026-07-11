@@ -19,12 +19,86 @@ logger = logging.getLogger("KisanVox")
 # Load environment variables
 load_dotenv()
 
+def get_db_connection():
+    import sqlite3
+    # Use writeable /tmp path on Vercel/Linux, kisanvox.db locally on Windows
+    is_vercel = "VERCEL" in os.environ or os.name != "nt"
+    db_path = "/tmp/kisanvox.db" if is_vercel else "kisanvox.db"
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_db():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Create users table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        phone TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        language TEXT DEFAULT 'en',
+        farm_location TEXT DEFAULT 'Nashik',
+        farm_size TEXT DEFAULT '2 Acres'
+    )
+    """)
+    
+    # Create orders table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS orders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        commodity TEXT NOT NULL,
+        quantity TEXT NOT NULL,
+        source_location TEXT NOT NULL,
+        destination_mandi TEXT NOT NULL,
+        modal_price TEXT NOT NULL,
+        driver_name TEXT NOT NULL,
+        driver_vehicle TEXT NOT NULL,
+        driver_phone TEXT NOT NULL,
+        eta TEXT NOT NULL,
+        status TEXT DEFAULT 'Pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id)
+    )
+    """)
+    
+    # Seed default user if not exists
+    cursor.execute("SELECT * FROM users WHERE phone = '9876543210'")
+    user = cursor.fetchone()
+    if not user:
+        cursor.execute(
+            "INSERT INTO users (name, phone, password, language, farm_location, farm_size) VALUES (?, ?, ?, ?, ?, ?)",
+            ("Patil Ramrao", "9876543210", "password", "mr", "Nashik", "5 Acres")
+        )
+        user_id = cursor.lastrowid
+        
+        # Seed default orders
+        cursor.execute(
+            "INSERT INTO orders (user_id, commodity, quantity, source_location, destination_mandi, modal_price, driver_name, driver_vehicle, driver_phone, eta, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (user_id, "Tomato", "50 Crates", "Nashik", "Kolar APMC (Karnataka)", "₹1,800/quintal", "Harish Verma", "Tata Ace PickUp", "+91-99887-76655", "Delivered", "Delivered")
+        )
+        cursor.execute(
+            "INSERT INTO orders (user_id, commodity, quantity, source_location, destination_mandi, modal_price, driver_name, driver_vehicle, driver_phone, eta, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (user_id, "Onion", "120 Bags", "Nashik", "Mumbai APMC (Vashi)", "₹2,550/quintal", "Ramesh Chawla", "Mahindra Bolero Pickup", "+91-98450-11223", "20 mins", "In Transit")
+        )
+        
+    conn.commit()
+    conn.close()
+    logger.info("SQLite database tables initialized and seeded successfully.")
+
 # Initialize FastAPI application
 app = FastAPI(
     title="KisanVox API",
     description="Voice-orchestrated, AI-agent-powered supply chain assistant for regional farmers.",
     version="1.0.0"
 )
+
+@app.on_event("startup")
+async def startup_event():
+    init_db()
 
 # Enable CORS for frontend integration
 app.add_middleware(
@@ -44,6 +118,24 @@ class SupplyChainOutput(BaseModel):
     regional_summary: str = Field(..., description="A friendly regional summary of action taken, translated to fit the farmer's context.")
     source_location: str = Field(..., description="The originating city or location of the farmer.")
     destination_mandi: str = Field(..., description="The target APMC Mandi destination.")
+
+
+# --- Pydantic Schemas for APIs ---
+class RegisterInput(BaseModel):
+    name: str
+    phone: str
+    password: str
+
+class LoginInput(BaseModel):
+    phone: str
+    password: str
+
+class ProfileUpdateInput(BaseModel):
+    name: str
+    phone: str
+    language: str
+    farm_location: str
+    farm_size: str
 
 
 # --- Concrete Python Execution Tools ---
@@ -471,16 +563,114 @@ async def transcribe_audio_sarvam(audio_file_path: str) -> str:
 
 # --- API Endpoints ---
 
+@app.post("/api/auth/register")
+async def register(input_data: RegisterInput):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "INSERT INTO users (name, phone, password, language, farm_location, farm_size) VALUES (?, ?, ?, ?, ?, ?)",
+            (input_data.name, input_data.phone, input_data.password, "en", "Nashik", "2 Acres")
+        )
+        conn.commit()
+        user_id = cursor.lastrowid
+        cursor.execute("SELECT id, name, phone, language, farm_location, farm_size FROM users WHERE id = ?", (user_id,))
+        user = dict(cursor.fetchone())
+        conn.close()
+        return {"status": "success", "user": user}
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=400, detail="Phone number already registered.")
+
+@app.post("/api/auth/login")
+async def login(input_data: LoginInput):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, phone, password, language, farm_location, farm_size FROM users WHERE phone = ?", (input_data.phone,))
+    user_row = cursor.fetchone()
+    conn.close()
+    if user_row and user_row["password"] == input_data.password:
+        user = dict(user_row)
+        del user["password"]
+        return {"status": "success", "user": user}
+    raise HTTPException(status_code=401, detail="Invalid phone number or password.")
+
+@app.get("/api/user/profile")
+async def get_profile(user_id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, phone, language, farm_location, farm_size FROM users WHERE id = ?", (user_id,))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return dict(row)
+    raise HTTPException(status_code=404, detail="User not found.")
+
+@app.post("/api/user/profile/update")
+async def update_profile(input_data: ProfileUpdateInput, user_id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE users SET name = ?, phone = ?, language = ?, farm_location = ?, farm_size = ? WHERE id = ?",
+            (input_data.name, input_data.phone, input_data.language, input_data.farm_location, input_data.farm_size, user_id)
+        )
+        conn.commit()
+        cursor.execute("SELECT id, name, phone, language, farm_location, farm_size FROM users WHERE id = ?", (user_id,))
+        user = dict(cursor.fetchone())
+        conn.close()
+        return {"status": "success", "user": user}
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=400, detail=f"Failed to update profile: {e}")
+
+@app.get("/api/orders")
+async def get_orders(user_id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM orders WHERE user_id = ? ORDER BY id DESC", (user_id,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+@app.post("/api/orders")
+async def create_order(
+    user_id: int,
+    commodity: str = Form(...),
+    quantity: str = Form(...),
+    source_location: str = Form(...),
+    destination_mandi: str = Form(...),
+    modal_price: str = Form(...),
+    driver_name: str = Form(...),
+    driver_vehicle: str = Form(...),
+    driver_phone: str = Form(...),
+    eta: str = Form(...)
+):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO orders (user_id, commodity, quantity, source_location, destination_mandi, modal_price, driver_name, driver_vehicle, driver_phone, eta, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')",
+        (user_id, commodity, quantity, source_location, destination_mandi, modal_price, driver_name, driver_vehicle, driver_phone, eta)
+    )
+    conn.commit()
+    order_id = cursor.lastrowid
+    cursor.execute("SELECT * FROM orders WHERE id = ?", (order_id,))
+    order = dict(cursor.fetchone())
+    conn.close()
+    return {"status": "success", "order": order}
+
 @app.post("/api/voice-process", response_model=SupplyChainOutput)
 async def process_voice_command(
     file: UploadFile = File(...),
-    custom_text_prompt: Optional[str] = Form(None)
+    custom_text_prompt: Optional[str] = Form(None),
+    user_id: Optional[int] = Form(1)
 ):
     """
     Accepts recorded voice files, transcribes (translates) them using Sarvam AI,
     coordinates with the Google Antigravity Agent, and returns the structured logistics receipt.
+    Saves the placed booking dynamically into the SQLite database.
     """
-    logger.info(f"Received request on /api/voice-process. Filename: {file.filename}")
+    logger.info(f"Received request on /api/voice-process. Filename: {file.filename}, UserID: {user_id}")
     
     # Save the uploaded audio to a temporary file in the system's writable temp directory
     import tempfile
@@ -507,6 +697,44 @@ async def process_voice_command(
             
         # 2. Run the agent coordinator
         agent_result = await execute_agent_loop(transcription)
+        
+        # 3. Save order dynamically to SQLite database
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            
+            driver_status = agent_result.transit_partner_status
+            driver_name = "Ramesh Chawla"
+            driver_vehicle = "Mahindra Bolero Pickup"
+            driver_phone = "+91-98450-11223"
+            eta = "20 mins"
+            
+            if "Harish" in driver_status:
+                driver_name = "Harish Verma"
+                driver_vehicle = "Tata Ace PickUp"
+                driver_phone = "+91-99887-76655"
+                eta = "15 mins"
+            elif "Satish" in driver_status:
+                driver_name = "Satish Kumar"
+                driver_vehicle = "Ashok Leyland Dost"
+                driver_phone = "+91-97654-32109"
+                eta = "30 mins"
+            elif "Gurpreet" in driver_status:
+                driver_name = "Gurpreet Singh"
+                driver_vehicle = "Eicher Pro 2049"
+                driver_phone = "+91-95432-10987"
+                eta = "25 mins"
+                
+            cursor.execute(
+                "INSERT INTO orders (user_id, commodity, quantity, source_location, destination_mandi, modal_price, driver_name, driver_vehicle, driver_phone, eta, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')",
+                (user_id, agent_result.commodity, agent_result.quantity, agent_result.source_location, agent_result.destination_mandi, agent_result.optimal_market_price, driver_name, driver_vehicle, driver_phone, eta)
+            )
+            conn.commit()
+            conn.close()
+            logger.info("Voice order saved successfully to SQLite database.")
+        except Exception as db_err:
+            logger.error(f"Failed to save voice order to database: {db_err}")
+            
         return agent_result
         
     except Exception as e:
