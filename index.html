@@ -109,77 +109,133 @@
       animation: pulse-ring 1.4s infinite;
     }
 
-    /* Field Mode High Contrast Overrides */
-    body.field-mode {
-      background-color: #000000 !important;
-      background-image: none !important;
+    /* Light Mode Overrides */
+    body.light-mode {
+      background-color: #f8fafc !important;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.05) 0px, transparent 40%),
+        radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.04) 0px, transparent 40%) !important;
+      color: #0f172a !important;
+    }
+
+    body.light-mode .glass-card {
+      background: rgba(255, 255, 255, 0.75) !important;
+      border: 1px solid rgba(226, 232, 240, 0.8) !important;
+      box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08) !important;
+      color: #0f172a !important;
+    }
+
+    body.light-mode .text-white,
+    body.light-mode h1,
+    body.light-mode h2,
+    body.light-mode h3,
+    body.light-mode h4,
+    body.light-mode p,
+    body.light-mode span:not(.font-mono),
+    body.light-mode label,
+    body.light-mode th,
+    body.light-mode td {
+      color: #0f172a !important;
+    }
+
+    body.light-mode .text-slate-300,
+    body.light-mode .text-slate-400,
+    body.light-mode .text-slate-500 {
+      color: #475569 !important;
+    }
+
+    body.light-mode .border-slate-800,
+    body.light-mode .border-slate-900 {
+      border-color: #cbd5e1 !important;
+    }
+
+    body.light-mode .bg-slate-900,
+    body.light-mode .bg-slate-900/60 {
+      background-color: #f1f5f9 !important;
+    }
+
+    body.light-mode .bg-slate-950/40 {
+      background-color: #f8fafc !important;
+    }
+
+    /* Left Sidebar Light Mode */
+    body.light-mode aside.bg-zinc-950/70 {
+      background-color: rgba(255, 255, 255, 0.8) !important;
+      border-right: 1px solid #cbd5e1 !important;
+    }
+    
+    body.light-mode .nav-btn {
+      color: #475569 !important;
+    }
+
+    body.light-mode .nav-btn:hover {
+      background-color: #f1f5f9 !important;
+      color: #0f172a !important;
+    }
+
+    body.light-mode .nav-btn.text-white.bg-emerald-500 {
+      background-color: #10b981 !important;
       color: #ffffff !important;
     }
 
-    body.field-mode .glass-card {
-      background-color: #000000 !important;
-      border: 3px solid #ffffff !important;
-      box-shadow: none !important;
-      color: #ffffff !important;
-      backdrop-filter: none !important;
+    /* Right Persistent Panel Light Mode */
+    body.light-mode aside.bg-zinc-950/60 {
+      background-color: rgba(241, 245, 249, 0.6) !important;
+      border-left: 1px solid #cbd5e1 !important;
     }
 
-    body.field-mode .text-slate-900,
-    body.field-mode .text-slate-800,
-    body.field-mode .text-slate-700,
-    body.field-mode .text-slate-600,
-    body.field-mode .text-slate-500,
-    body.field-mode .text-slate-400,
-    body.field-mode .text-slate-300,
-    body.field-mode .text-slate-200,
-    body.field-mode .text-slate-100 {
-      color: #ffffff !important;
-    }
-
-    body.field-mode .text-emerald-400,
-    body.field-mode .text-emerald-500,
-    body.field-mode .text-emerald-600,
-    body.field-mode .text-orange-400,
-    body.field-mode .text-orange-500,
-    body.field-mode .text-amber-400,
-    body.field-mode .text-amber-500 {
-      color: #ffff00 !important; /* High contrast yellow */
-      font-weight: 900 !important;
-    }
-
-    body.field-mode .border-slate-800,
-    body.field-mode .border-slate-700,
-    body.field-mode .border-slate-200,
-    body.field-mode .border-slate-100,
-    body.field-mode .border-emerald-100 {
-      border-color: #ffffff !important;
-      border-width: 2px !important;
-    }
-
-    body.field-mode .bg-slate-950,
-    body.field-mode .bg-slate-900,
-    body.field-mode .bg-slate-800,
-    body.field-mode .bg-slate-50 {
-      background-color: #000000 !important;
-    }
-
-    body.field-mode input,
-    body.field-mode select,
-    body.field-mode textarea {
-      background-color: #000000 !important;
-      color: #ffffff !important;
-      border: 3px solid #ffffff !important;
-    }
-
-    body.field-mode button {
+    body.light-mode .bg-slate-950 {
       background-color: #ffffff !important;
-      color: #000000 !important;
-      border: 3px solid #ffffff !important;
-      font-weight: 900 !important;
+      border-color: #cbd5e1 !important;
     }
 
-    body.field-mode .leaflet-container {
-      filter: grayscale(1) contrast(3) invert(1) !important;
+    body.light-mode .text-slate-200 {
+      color: #1e293b !important;
+    }
+
+    /* KPI numbers in Light Mode */
+    body.light-mode .text-emerald-400 {
+      color: #059669 !important;
+    }
+    body.light-mode .text-amber-300 {
+      color: #d97706 !important;
+    }
+    body.light-mode .text-orange-400 {
+      color: #ea580c !important;
+    }
+    body.light-mode .text-sky-400 {
+      color: #0284c7 !important;
+    }
+
+    /* Inputs and Selects in Light Mode */
+    body.light-mode input,
+    body.light-mode select,
+    body.light-mode textarea {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+      border-color: #cbd5e1 !important;
+    }
+
+    body.light-mode button:not(.bg-emerald-500):not(.view-btn):not(.nav-btn):not(#mic-btn) {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+      border: 1px solid #cbd5e1 !important;
+    }
+
+    body.light-mode button:not(.bg-emerald-500):not(.view-btn):not(.nav-btn):not(#mic-btn):hover {
+      background-color: #f8fafc !important;
+    }
+
+    /* confirmation and receipt modal overrides in Light Mode */
+    body.light-mode #confirm-modal .bg-white,
+    body.light-mode #receipt-modal .bg-white {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+    }
+
+    body.light-mode #confirm-modal .bg-slate-50 {
+      background-color: #f8fafc !important;
+      border-color: #cbd5e1 !important;
     }
   </style>
 </head>
@@ -343,10 +399,10 @@
         </div>
         
         <div class="flex flex-wrap items-center gap-3">
-          <!-- Field Mode Toggle -->
-          <button onclick="toggleFieldMode()" id="field-mode-btn" class="flex items-center gap-2 bg-slate-900 border border-slate-800 hover:border-slate-700 hover:bg-slate-800 transition-all px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-300">
-            <i class="fa-solid fa-circle-half-stroke text-amber-400"></i>
-            <span>Field Mode: Off</span>
+          <!-- Light Mode Toggle -->
+          <button onclick="toggleLightMode()" id="light-mode-btn" class="flex items-center gap-2 bg-slate-900 border border-slate-800 hover:border-slate-700 hover:bg-slate-800 transition-all px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-300">
+            <i class="fa-solid fa-sun text-amber-450 text-amber-400"></i>
+            <span>Light Mode</span>
           </button>
           
           <!-- App Language Bar -->
@@ -1147,18 +1203,18 @@
       switchTab('dashboard');
     }
 
-    // Toggles outdoor high-contrast field mode
-    function toggleFieldMode() {
+    // Toggles light/dark modes
+    function toggleLightMode() {
       const body = document.body;
-      const btn = document.getElementById('field-mode-btn');
-      if (body.classList.contains('field-mode')) {
-        body.classList.remove('field-mode');
-        btn.innerHTML = `<i class="fa-solid fa-circle-half-stroke text-amber-400"></i><span>Field Mode: Off</span>`;
+      const btn = document.getElementById('light-mode-btn');
+      if (body.classList.contains('light-mode')) {
+        body.classList.remove('light-mode');
+        btn.innerHTML = `<i class="fa-solid fa-sun text-amber-400"></i><span>Light Mode</span>`;
         btn.className = "flex items-center gap-2 bg-slate-900 border border-slate-800 hover:border-slate-700 hover:bg-slate-800 transition-all px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-300";
       } else {
-        body.classList.add('field-mode');
-        btn.innerHTML = `<i class="fa-solid fa-circle-half-stroke text-black"></i><span>Field Mode: On</span>`;
-        btn.className = "flex items-center gap-2 bg-white border-2 border-white transition-all px-4 py-2.5 rounded-2xl text-xs font-black text-black";
+        body.classList.add('light-mode');
+        btn.innerHTML = `<i class="fa-solid fa-moon text-slate-400"></i><span>Dark Mode</span>`;
+        btn.className = "flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 transition-all px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-800 shadow-sm";
       }
       
       if (map) {
