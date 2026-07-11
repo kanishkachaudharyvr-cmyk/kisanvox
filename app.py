@@ -482,10 +482,9 @@ async def process_voice_command(
     """
     logger.info(f"Received request on /api/voice-process. Filename: {file.filename}")
     
-    # Save the uploaded audio to a temporary file
-    temp_dir = os.path.join(os.path.dirname(__file__), "temp_uploads")
-    os.makedirs(temp_dir, exist_ok=True)
-    
+    # Save the uploaded audio to a temporary file in the system's writable temp directory
+    import tempfile
+    temp_dir = tempfile.gettempdir()
     temp_file_path = os.path.join(temp_dir, f"recording_{uuid.uuid4().hex}.wav")
     
     try:
