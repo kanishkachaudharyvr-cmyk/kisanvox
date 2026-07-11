@@ -691,6 +691,63 @@
     </div>
   </div>
 
+  <!-- ================= CONFIRMATION MODAL OVERLAY ================= -->
+  <div id="confirm-modal" class="hidden fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl border border-emerald-100 flex flex-col overflow-hidden">
+      <!-- Modal Header -->
+      <div class="bg-slate-900 text-white p-6">
+        <h3 class="font-outfit font-extrabold text-lg">Verify Order Details</h3>
+        <p class="text-xs text-slate-400">Please review the parsed dispatch order details before confirming.</p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 flex flex-col gap-4 text-xs text-slate-600">
+        <div class="grid grid-cols-2 gap-3.5 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+          <div>
+            <span class="text-slate-400 block mb-0.5 font-semibold">COMMODITY</span>
+            <span id="confirm-commodity" class="font-extrabold text-slate-900">Onion</span>
+          </div>
+          <div>
+            <span class="text-slate-400 block mb-0.5 font-semibold">QUANTITY</span>
+            <span id="confirm-quantity" class="font-extrabold text-slate-900">85 bags</span>
+          </div>
+          <div>
+            <span class="text-slate-400 block mb-0.5 font-semibold">FROM (ORIGIN)</span>
+            <span id="confirm-source" class="font-extrabold text-slate-900">Nashik</span>
+          </div>
+          <div>
+            <span class="text-slate-400 block mb-0.5 font-semibold">TO (MANDI)</span>
+            <span id="confirm-mandi" class="font-extrabold text-slate-900">Mumbai APMC</span>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center bg-emerald-50 text-emerald-800 border border-emerald-100/50 p-3 rounded-xl">
+          <span class="font-semibold text-slate-500 text-[10px]">OPTIMAL APMC RATE</span>
+          <span id="confirm-price" class="font-extrabold text-sm text-slate-900">₹2,550/quintal</span>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <span class="text-slate-400 block font-semibold">MATCHED TRANSIT PARTNER</span>
+          <div class="flex items-center justify-between font-semibold text-slate-900 border border-slate-100 p-3 rounded-xl bg-slate-50">
+            <span id="confirm-driver" class="font-bold text-slate-800">Ramesh Chawla (Mahindra Bolero)</span>
+            <span id="confirm-eta" class="bg-amber-100 text-amber-800 text-[10px] px-2.5 py-1 rounded-xl font-bold">20 mins</span>
+          </div>
+        </div>
+
+        <!-- Confirm and Cancel Buttons -->
+        <div class="grid grid-cols-2 gap-3 mt-4">
+          <button onclick="closeConfirmModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-2xl transition-all">
+            Cancel Booking
+          </button>
+          <button onclick="placeConfirmedOrder()" class="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold py-3 rounded-2xl shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2">
+            <span>Confirm & Book</span>
+            <i class="fa-solid fa-truck"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
   <!-- ================= MASTER CONTROLLER JAVASCRIPT ================= -->
   <script>
@@ -702,6 +759,7 @@
     let currentUser = null;
     let currentLanguage = 'en';
     let isRecording = false;
+    let currentDraftOrder = null;
 
     // Coordinate mapping index for Leaflet routing
     const cityCoords = {
@@ -1204,21 +1262,64 @@
         
         if (response.ok) {
           const data = await response.json();
-          document.getElementById('record-status').innerText = "Booked successfully!";
+          document.getElementById('record-status').innerText = "Parsed details successfully!";
           
-          // Display printable ticket modal details
-          document.getElementById('ticket-commodity').innerText = `${data.commodity.toUpperCase()} DISPATCH`;
-          document.getElementById('ticket-price').innerText = data.optimal_market_price;
-          document.getElementById('ticket-quantity').innerText = data.quantity;
-          document.getElementById('ticket-source').innerText = data.source_location;
-          document.getElementById('ticket-mandi').innerText = data.destination_mandi;
-          document.getElementById('ticket-driver').innerText = data.transit_partner_status;
-          document.getElementById('ticket-summary').innerText = data.regional_summary;
+          // Parse driver details for confirmation view
+          let driverName = "Ramesh Chawla";
+          let driverVehicle = "Mahindra Bolero Pickup";
+          let driverPhone = "+91-98450-11223";
+          let eta = "20 mins";
           
-          // Open Modal
-          document.getElementById('receipt-modal').classList.remove('hidden');
+          const status = data.transit_partner_status;
+          if (status.includes("Harish")) {
+            driverName = "Harish Verma";
+            driverVehicle = "Tata Ace PickUp";
+            driverPhone = "+91-99887-76655";
+            eta = "15 mins";
+          } else if (status.includes("Satish")) {
+            driverName = "Satish Kumar";
+            driverVehicle = "Ashok Leyland Dost";
+            driverPhone = "+91-97654-32109";
+            eta = "30 mins";
+          } else if (status.includes("Gurpreet")) {
+            driverName = "Gurpreet Singh";
+            driverVehicle = "Eicher Pro 2049";
+            driverPhone = "+91-95432-10987";
+            eta = "25 mins";
+          }
 
-          // Update Leaflet Route Map
+          // Caching current draft order state
+          currentDraftOrder = {
+            commodity: data.commodity,
+            quantity: data.quantity,
+            source_location: data.source_location,
+            destination_mandi: data.destination_mandi,
+            modal_price: data.optimal_market_price,
+            driver_name: driverName,
+            driver_vehicle: driverVehicle,
+            driver_phone: driverPhone,
+            eta: eta,
+            regional_summary: data.regional_summary
+          };
+
+          // Fill Confirmation Modal Elements
+          document.getElementById('confirm-commodity').innerText = data.commodity;
+          document.getElementById('confirm-quantity').innerText = data.quantity;
+          document.getElementById('confirm-source').innerText = data.source_location;
+          document.getElementById('confirm-mandi').innerText = data.destination_mandi;
+          document.getElementById('confirm-price').innerText = data.optimal_market_price;
+          document.getElementById('confirm-driver').innerText = `${driverName} (${driverVehicle})`;
+          document.getElementById('confirm-eta').innerText = eta;
+
+          // Open Confirmation Modal
+          document.getElementById('confirm-modal').classList.remove('hidden');
+
+          // Reset status text
+          setTimeout(() => {
+            document.getElementById('record-status').innerText = "Click to Speak";
+          }, 1500);
+
+          // Update Leaflet Route Map (Preview)
           updateMapRoute(data.source_location, data.destination_mandi);
         } else {
           alert("Error processing your voice command on the server.");
@@ -1228,6 +1329,64 @@
         alert("Network error connecting to backend API.");
         document.getElementById('record-status').innerText = "Failed. Try again";
       }
+    }
+
+    async function placeConfirmedOrder() {
+      if (!currentDraftOrder) return;
+
+      // Close confirmation view
+      document.getElementById('confirm-modal').classList.add('hidden');
+      document.getElementById('record-status').innerText = "Booking order in database...";
+
+      // Build parameters
+      const params = new URLSearchParams();
+      params.append("user_id", currentUser.id);
+      params.append("commodity", currentDraftOrder.commodity);
+      params.append("quantity", currentDraftOrder.quantity);
+      params.append("source_location", currentDraftOrder.source_location);
+      params.append("destination_mandi", currentDraftOrder.destination_mandi);
+      params.append("modal_price", currentDraftOrder.modal_price);
+      params.append("driver_name", currentDraftOrder.driver_name);
+      params.append("driver_vehicle", currentDraftOrder.driver_vehicle);
+      params.append("driver_phone", currentDraftOrder.driver_phone);
+      params.append("eta", currentDraftOrder.eta);
+
+      try {
+        const response = await fetch(`/api/orders?user_id=${currentUser.id}`, {
+          method: 'POST',
+          body: params
+        });
+
+        if (response.ok) {
+          document.getElementById('record-status').innerText = "Booking Confirmed!";
+
+          // Show receipt modal details
+          document.getElementById('ticket-commodity').innerText = `${currentDraftOrder.commodity.toUpperCase()} DISPATCH`;
+          document.getElementById('ticket-price').innerText = currentDraftOrder.modal_price;
+          document.getElementById('ticket-quantity').innerText = currentDraftOrder.quantity;
+          document.getElementById('ticket-source').innerText = currentDraftOrder.source_location;
+          document.getElementById('ticket-mandi').innerText = currentDraftOrder.destination_mandi;
+          document.getElementById('ticket-driver').innerText = `${currentDraftOrder.driver_name} (${currentDraftOrder.driver_vehicle})`;
+          document.getElementById('ticket-summary').innerText = currentDraftOrder.regional_summary;
+
+          // Open Modal
+          document.getElementById('receipt-modal').classList.remove('hidden');
+
+          // Reset Draft
+          currentDraftOrder = null;
+        } else {
+          alert("Could not register the confirmed booking in the database.");
+          document.getElementById('record-status').innerText = "Booking failed.";
+        }
+      } catch (err) {
+        alert("Failed to connect to database for booking.");
+        document.getElementById('record-status').innerText = "Booking failed.";
+      }
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('confirm-modal').classList.add('hidden');
+      currentDraftOrder = null;
     }
 
     function closeReceiptModal() {

@@ -697,44 +697,6 @@ async def process_voice_command(
             
         # 2. Run the agent coordinator
         agent_result = await execute_agent_loop(transcription)
-        
-        # 3. Save order dynamically to SQLite database
-        try:
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            
-            driver_status = agent_result.transit_partner_status
-            driver_name = "Ramesh Chawla"
-            driver_vehicle = "Mahindra Bolero Pickup"
-            driver_phone = "+91-98450-11223"
-            eta = "20 mins"
-            
-            if "Harish" in driver_status:
-                driver_name = "Harish Verma"
-                driver_vehicle = "Tata Ace PickUp"
-                driver_phone = "+91-99887-76655"
-                eta = "15 mins"
-            elif "Satish" in driver_status:
-                driver_name = "Satish Kumar"
-                driver_vehicle = "Ashok Leyland Dost"
-                driver_phone = "+91-97654-32109"
-                eta = "30 mins"
-            elif "Gurpreet" in driver_status:
-                driver_name = "Gurpreet Singh"
-                driver_vehicle = "Eicher Pro 2049"
-                driver_phone = "+91-95432-10987"
-                eta = "25 mins"
-                
-            cursor.execute(
-                "INSERT INTO orders (user_id, commodity, quantity, source_location, destination_mandi, modal_price, driver_name, driver_vehicle, driver_phone, eta, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')",
-                (user_id, agent_result.commodity, agent_result.quantity, agent_result.source_location, agent_result.destination_mandi, agent_result.optimal_market_price, driver_name, driver_vehicle, driver_phone, eta)
-            )
-            conn.commit()
-            conn.close()
-            logger.info("Voice order saved successfully to SQLite database.")
-        except Exception as db_err:
-            logger.error(f"Failed to save voice order to database: {db_err}")
-            
         return agent_result
         
     except Exception as e:
