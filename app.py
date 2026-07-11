@@ -118,6 +118,7 @@ class SupplyChainOutput(BaseModel):
     regional_summary: str = Field(..., description="A friendly regional summary of action taken, translated to fit the farmer's context.")
     source_location: str = Field(..., description="The originating city or location of the farmer.")
     destination_mandi: str = Field(..., description="The target APMC Mandi destination.")
+    available_markets: list = Field(default=[], description="List of alternative APMC mandis and their prices.")
 
 
 # --- Pydantic Schemas for APIs ---
@@ -509,7 +510,8 @@ async def execute_agent_loop(instruction_text: str) -> SupplyChainOutput:
         transit_partner_status=f"{driver['driver_name']} ({driver['vehicle']}) | Rating: {driver['rating']} | Phone: {driver['phone']} | ETA: {driver['eta']}",
         regional_summary=summary,
         source_location=source_location,
-        destination_mandi=destination_mandi
+        destination_mandi=destination_mandi,
+        available_markets=price_info.get("markets", [])
     )
 
 

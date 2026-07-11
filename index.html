@@ -716,14 +716,16 @@
             <span id="confirm-source" class="font-extrabold text-slate-900">Nashik</span>
           </div>
           <div>
-            <span class="text-slate-400 block mb-0.5 font-semibold">TO (MANDI)</span>
-            <span id="confirm-mandi" class="font-extrabold text-slate-900">Mumbai APMC</span>
+            <span class="text-slate-400 block mb-0.5 font-semibold">SELECTED DESTINATION</span>
+            <span id="confirm-mandi" class="font-extrabold text-slate-900 text-emerald-600">Mumbai APMC</span>
           </div>
         </div>
 
-        <div class="flex justify-between items-center bg-emerald-50 text-emerald-800 border border-emerald-100/50 p-3 rounded-xl">
-          <span class="font-semibold text-slate-500 text-[10px]">OPTIMAL APMC RATE</span>
-          <span id="confirm-price" class="font-extrabold text-sm text-slate-900">₹2,550/quintal</span>
+        <div class="flex flex-col gap-2">
+          <span class="text-slate-400 block font-semibold">AVAILABLE MANDI PRICE OPTIONS</span>
+          <div id="confirm-market-options" class="flex flex-col gap-2 max-h-[160px] overflow-y-auto pr-1">
+            <!-- Dynamic mandi radio buttons injected here -->
+          </div>
         </div>
 
         <div class="flex flex-col gap-2">
@@ -1302,22 +1304,90 @@
             regional_summary: data.regional_summary
           };
 
-          // Fill Confirmation Modal Elements
+          // Fill static confirmation details
           document.getElementById('confirm-commodity').innerText = data.commodity;
           document.getElementById('confirm-quantity').innerText = data.quantity;
           document.getElementById('confirm-source').innerText = data.source_location;
-          document.getElementById('confirm-mandi').innerText = data.destination_mandi;
-          document.getElementById('confirm-price').innerText = data.optimal_market_price;
+          document.getElementById('confirm-mandi').innerText = data.destination_mandi.replace(' APMC', '');
           document.getElementById('confirm-driver').innerText = `${driverName} (${driverVehicle})`;
           document.getElementById('confirm-eta').innerText = eta;
 
+          // Render available mandi options
+          let markets = data.available_markets || [];
+          if (markets.length === 0) {
+            const crop = data.commodity.toLowerCase();
+            if (crop.includes('onion')) {
+              markets = [
+                { name: "Mumbai APMC (Vashi)", price: 2550, trend: "Upward 📈" },
+                { name: "Pune APMC", price: 2350, trend: "Stable" },
+                { name: "Lasalgaon APMC (Nashik)", price: 2200, trend: "Stable" }
+              ];
+            } else if (crop.includes('tomato')) {
+              markets = [
+                { name: "Azadpur APMC (Delhi)", price: 2400, trend: "Upward 📈" },
+                { name: "Narayangaon APMC (Pune)", price: 2100, trend: "Stable" },
+                { name: "Kolar APMC (Karnataka)", price: 1800, trend: "Stable" }
+              ];
+            } else if (crop.includes('wheat')) {
+              markets = [
+                { name: "Kota APMC (Rajasthan)", price: 2720, trend: "Upward 📈" },
+                { name: "Indore APMC (MP)", price: 2650, trend: "Stable" },
+                { name: "Bhopal APMC", price: 2580, trend: "Stable" }
+              ];
+            } else if (crop.includes('potato')) {
+              markets = [
+                { name: "Kolkata APMC", price: 1650, trend: "Upward 📈" },
+                { name: "Ahmedabad APMC", price: 1550, trend: "Stable" },
+                { name: "Agra APMC (UP)", price: 1400, trend: "Stable" }
+              ];
+            } else {
+              markets = [
+                { name: "Amravati APMC (Maharashtra)", price: 7350, trend: "Upward 📈" },
+                { name: "Rajkot APMC (Gujarat)", price: 7100, trend: "Stable" },
+                { name: "Adoni APMC (AP)", price: 6900, trend: "Stable" }
+              ];
+            }
+          }
+
+          const optionsContainer = document.getElementById('confirm-market-options');
+          optionsContainer.innerHTML = '';
+          
+          markets.forEach((mkt, idx) => {
+            const cleanMktName = mkt.name;
+            const formattedPrice = typeof mkt.price === 'number' ? `₹${mkt.price}/quintal` : mkt.price;
+            const isChecked = idx === 0 ? 'checked' : '';
+            
+            const div = document.createElement('div');
+            div.className = "flex items-center justify-between p-3.5 rounded-xl border border-slate-100 bg-slate-50 hover:bg-emerald-50/35 hover:border-emerald-200 transition-colors cursor-pointer";
+            
+            div.onclick = (e) => {
+              if (e.target.tagName !== 'INPUT') {
+                div.querySelector('input').click();
+              }
+            };
+            
+            div.innerHTML = `
+              <div class="flex items-center gap-3">
+                <input type="radio" name="mandi-choice" value="${cleanMktName}" data-price="${formattedPrice}" ${isChecked} class="w-4 h-4 text-emerald-500 border-slate-300 focus:ring-emerald-500">
+                <div>
+                  <p class="font-bold text-slate-800">${cleanMktName}</p>
+                  <p class="text-[10px] text-slate-400 font-normal">${mkt.trend || 'Daily Wholesale Rate'}</p>
+                </div>
+              </div>
+              <span class="font-extrabold text-slate-900 text-sm">${formattedPrice}</span>
+            `;
+            
+            div.querySelector('input').onchange = (e) => {
+              if (e.target.checked) {
+                selectMandiOption(cleanMktName, formattedPrice);
+              }
+            };
+            
+            optionsContainer.appendChild(div);
+          });
+
           // Open Confirmation Modal
           document.getElementById('confirm-modal').classList.remove('hidden');
-
-          // Reset status text
-          setTimeout(() => {
-            document.getElementById('record-status').innerText = "Click to Speak";
-          }, 1500);
 
           // Update Leaflet Route Map (Preview)
           updateMapRoute(data.source_location, data.destination_mandi);
@@ -1382,6 +1452,53 @@
         alert("Failed to connect to database for booking.");
         document.getElementById('record-status').innerText = "Booking failed.";
       }
+    }
+
+    function selectMandiOption(mandiName, modalPrice) {
+      if (!currentDraftOrder) return;
+      
+      // Update selected mandi and price
+      currentDraftOrder.destination_mandi = mandiName;
+      currentDraftOrder.modal_price = modalPrice;
+      
+      // Update select text in header
+      document.getElementById('confirm-mandi').innerText = mandiName.replace(' APMC', '');
+      
+      // Update route map line
+      updateMapRoute(currentDraftOrder.source_location, mandiName);
+      
+      // Recalculate matched driver based on destination city keyword
+      let driverName = "Ramesh Chawla";
+      let driverVehicle = "Mahindra Bolero Pickup";
+      let driverPhone = "+91-98450-11223";
+      let eta = "20 mins";
+      
+      const lowerMandi = mandiName.toLowerCase();
+      if (lowerMandi.includes("delhi") || lowerMandi.includes("kolar") || lowerMandi.includes("north")) {
+        driverName = "Harish Verma";
+        driverVehicle = "Tata Ace PickUp";
+        driverPhone = "+91-99887-76655";
+        eta = "15 mins";
+      } else if (lowerMandi.includes("pune") || lowerMandi.includes("ahmedabad") || lowerMandi.includes("west")) {
+        driverName = "Satish Kumar";
+        driverVehicle = "Ashok Leyland Dost";
+        driverPhone = "+91-97654-32109";
+        eta = "30 mins";
+      } else if (lowerMandi.includes("nagpur") || lowerMandi.includes("kolkata") || lowerMandi.includes("east")) {
+        driverName = "Gurpreet Singh";
+        driverVehicle = "Eicher Pro 2049";
+        driverPhone = "+91-95432-10987";
+        eta = "25 mins";
+      }
+      
+      currentDraftOrder.driver_name = driverName;
+      currentDraftOrder.driver_vehicle = driverVehicle;
+      currentDraftOrder.driver_phone = driverPhone;
+      currentDraftOrder.eta = eta;
+      
+      // Update driver text
+      document.getElementById('confirm-driver').innerText = `${driverName} (${driverVehicle})`;
+      document.getElementById('confirm-eta').innerText = eta;
     }
 
     function closeConfirmModal() {
