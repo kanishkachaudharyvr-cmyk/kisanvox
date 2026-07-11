@@ -99,6 +99,15 @@
       color: white;
     }
 
+    /* Hide scrollbars globally but keep functionality */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none !important;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none !important;  /* IE and Edge */
+      scrollbar-width: none !important;  /* Firefox */
+    }
+
     /* Animated voice recording pulse */
     @keyframes pulse-ring {
       0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5), 0 0 8px rgba(16, 185, 129, 0.3); }
@@ -331,7 +340,7 @@
   <div id="main-app" class="hidden flex-grow flex flex-col xl:flex-row xl:h-screen xl:overflow-hidden w-full bg-black text-slate-100">
     
     <!-- Sidebar Navigation (Left Pane) -->
-    <aside class="w-full xl:w-64 bg-zinc-950/70 text-slate-300 flex flex-col justify-between p-6 border-b xl:border-b-0 xl:border-r border-slate-900 shrink-0">
+    <aside class="w-full xl:w-64 bg-zinc-950/70 text-slate-300 flex flex-col justify-between p-6 border-b xl:border-b-0 xl:border-r border-slate-900 shrink-0 no-scrollbar">
       <div class="flex flex-col gap-8">
         <!-- Logo -->
         <div class="flex items-center gap-3">
@@ -389,7 +398,7 @@
     </aside>
 
     <!-- Center Workspace (Middle Pane) -->
-    <main class="flex-grow flex flex-col p-4 md:p-6 overflow-y-auto max-w-7xl w-full">
+    <main class="flex-grow flex flex-col p-4 md:p-6 overflow-y-auto max-w-7xl w-full no-scrollbar">
       
       <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 border-b border-slate-800 pb-3">
         <div>
@@ -836,7 +845,7 @@
     </main>
 
     <!-- Persistent Utility Pane (Right Pane) -->
-    <aside class="w-full xl:w-[350px] 2xl:w-[420px] bg-zinc-950/60 border-t xl:border-t-0 xl:border-l border-slate-900/80 p-5 flex flex-col gap-4 shrink-0 overflow-y-auto">
+    <aside class="w-full xl:w-[350px] 2xl:w-[420px] bg-zinc-950/60 border-t xl:border-t-0 xl:border-l border-slate-900/80 p-5 flex flex-col gap-4 shrink-0 overflow-y-auto no-scrollbar">
       
       <!-- Voice Controller section -->
       <div class="glass-card rounded-3xl p-5 flex flex-col items-center justify-center text-center shadow-lg relative overflow-hidden border border-slate-900">
@@ -1307,7 +1316,7 @@
         weight: 2,
         opacity: 1,
         fillOpacity: 0.8
-      }).addTo(map).bindPopup(`<b>Your Farm</b><br>${cleanSrc}`).openPopup();
+      }).addTo(map).bindPopup(`<b>Your Farm</b><br>${cleanSrc}`, { autoPan: false }).openPopup();
       mapMarkers.push(srcMarker);
 
       // Add Red Circle Marker for target APMC Mandi
@@ -1318,7 +1327,7 @@
         weight: 2,
         opacity: 1,
         fillOpacity: 0.8
-      }).addTo(map).bindPopup(`<b>Target Mandi</b><br>${cleanDest} APMC`);
+      }).addTo(map).bindPopup(`<b>Target Mandi</b><br>${cleanDest} APMC`, { autoPan: false });
       mapMarkers.push(destMarker);
 
       // Draw dashed route polyline
@@ -1331,7 +1340,7 @@
 
       // Fit map view to coordinate bounds
       const bounds = L.latLngBounds([srcCoords, destCoords]);
-      map.fitBounds(bounds, { padding: [50, 50] });
+      map.fitBounds(bounds, { padding: [50, 50], animate: false });
 
       // Update indicators
       document.getElementById('route-indicator-label').innerText = `${cleanSrc} ➔ ${cleanDest}`;
@@ -1818,6 +1827,22 @@
 
     function closeReceiptModal() {
       document.getElementById('receipt-modal').classList.add('hidden');
+    }
+
+    // Lock Right Pane scrolling on desktop widths (prevents focus scrolling issues)
+    const rightAsideEl = document.querySelector('aside.no-scrollbar');
+    if (rightAsideEl) {
+      rightAsideEl.addEventListener('scroll', () => {
+        if (window.innerWidth >= 1280) {
+          rightAsideEl.scrollTop = 0;
+        }
+      });
+      
+      rightAsideEl.addEventListener('focusin', () => {
+        if (window.innerWidth >= 1280) {
+          setTimeout(() => { rightAsideEl.scrollTop = 0; }, 10);
+        }
+      });
     }
   </script>
 </body>
