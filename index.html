@@ -391,10 +391,9 @@
     <!-- Center Workspace (Middle Pane) -->
     <main class="flex-grow flex flex-col p-4 md:p-6 overflow-y-auto max-w-7xl w-full">
       
-      <!-- Header -->
       <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 border-b border-slate-800 pb-3">
         <div>
-          <h2 class="text-2xl font-outfit font-extrabold text-white tracking-tight">Command Center</h2>
+          <h2 class="text-2xl font-outfit font-extrabold text-white tracking-tight">KisanVox Operations Desk</h2>
           <p class="text-xs text-slate-400">Real-time agricultural logistics and price telemetry.</p>
         </div>
         
@@ -418,11 +417,11 @@
           </div>
         </div>
       </header>
-
+ 
       <!-- Glanceable Wide KPI Grid -->
       <section class="grid grid-cols-2 2xl:grid-cols-4 gap-4 mb-4">
         <!-- Soil Moisture Card -->
-        <div class="glass-card rounded-3xl p-4.5 border border-emerald-500/10 shadow-lg shadow-emerald-950/5 flex flex-col justify-between min-h-[110px]">
+        <div class="glass-card rounded-3xl p-4 border border-emerald-500/10 shadow-lg shadow-emerald-950/5 flex flex-col justify-between min-h-[125px]">
           <span class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">SOIL MOISTURE</span>
           <div class="flex items-baseline gap-2 my-1">
             <span class="text-4xl md:text-5xl font-outfit font-black text-emerald-400 font-mono">42%</span>
@@ -430,9 +429,9 @@
           </div>
           <span class="text-[10px] text-slate-400 font-medium">Nashik Zone Sensor Network</span>
         </div>
-
+ 
         <!-- Mandi Index Card -->
-        <div class="glass-card rounded-3xl p-4.5 border border-amber-400/10 shadow-lg shadow-amber-950/5 flex flex-col justify-between min-h-[110px]">
+        <div class="glass-card rounded-3xl p-4 border border-amber-400/10 shadow-lg shadow-amber-950/5 flex flex-col justify-between min-h-[125px]">
           <span class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">MANDI INDEX</span>
           <div class="flex items-baseline gap-2 my-1">
             <span class="text-4xl md:text-5xl font-outfit font-black text-amber-300 font-mono">+12.4%</span>
@@ -440,9 +439,9 @@
           </div>
           <span class="text-[10px] text-slate-400 font-medium">vs Yesterday Modal Rates</span>
         </div>
-
+ 
         <!-- Active Trucks Card -->
-        <div class="glass-card rounded-3xl p-4.5 border border-orange-500/10 shadow-lg shadow-orange-950/5 flex flex-col justify-between min-h-[110px]">
+        <div class="glass-card rounded-3xl p-4 border border-orange-500/10 shadow-lg shadow-orange-950/5 flex flex-col justify-between min-h-[125px]">
           <span class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">ACTIVE TRUCKS</span>
           <div class="flex items-baseline gap-2 my-1">
             <span class="text-4xl md:text-5xl font-outfit font-black text-orange-400 font-mono">2</span>
@@ -450,9 +449,9 @@
           </div>
           <span class="text-[10px] text-slate-400 font-medium">Estimated Arrival: 25 mins</span>
         </div>
-
+ 
         <!-- Temperature Card -->
-        <div class="glass-card rounded-3xl p-4.5 border border-slate-800 shadow-lg flex flex-col justify-between min-h-[110px]">
+        <div class="glass-card rounded-3xl p-4 border border-slate-800 shadow-lg flex flex-col justify-between min-h-[125px]">
           <span class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">FIELD TEMPERATURE</span>
           <div class="flex items-baseline gap-2 my-1">
             <span class="text-4xl md:text-5xl font-outfit font-black text-sky-400 font-mono">28°C</span>
@@ -466,7 +465,7 @@
       <section id="tab-dashboard" class="tab-content flex flex-col gap-4">
         <div class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4">
           <!-- Weather Advisory Details -->
-          <div class="glass-card rounded-3xl p-5 shadow-sm flex flex-col gap-3">
+          <div class="glass-card rounded-3xl p-5 shadow-sm flex flex-col gap-3 h-fit">
             <h3 class="text-base font-outfit font-bold text-white flex items-center gap-2">
               <i class="fa-solid fa-cloud-sun text-emerald-400"></i>
               <span>Weather Advisory Alerts</span>
@@ -498,7 +497,7 @@
           </div>
 
           <!-- Planting Suggestions -->
-          <div class="glass-card rounded-3xl p-5 shadow-sm flex flex-col gap-3">
+          <div class="glass-card rounded-3xl p-5 shadow-sm flex flex-col gap-3 h-fit">
             <h3 class="text-base font-outfit font-bold text-white flex items-center gap-2">
               <i class="fa-solid fa-seedling text-emerald-400"></i>
               <span>Crop Sowing Recommendations</span>
@@ -523,7 +522,7 @@
           </div>
 
           <!-- State Mandi Price Index -->
-          <div class="glass-card rounded-3xl p-5 shadow-sm flex flex-col gap-3">
+          <div class="glass-card rounded-3xl p-5 shadow-sm flex flex-col gap-3 h-fit">
             <h3 class="text-base font-outfit font-bold text-white flex items-center gap-2">
               <i class="fa-solid fa-chart-line text-emerald-400"></i>
               <span>State Mandi Price Index</span>
@@ -1265,11 +1264,12 @@
     function initLeafletMap() {
       if (map) return;
       
-      // Center map on India
+      // Center map on India (disable keyboard focus to prevent layout jumping/scroll shifts)
       map = L.map('map', {
         center: [20.5937, 78.9629],
         zoom: 5,
-        zoomControl: true
+        zoomControl: true,
+        keyboard: false
       });
       
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1335,6 +1335,12 @@
 
       // Update indicators
       document.getElementById('route-indicator-label').innerText = `${cleanSrc} ➔ ${cleanDest}`;
+
+      // Reset scroll position of parent aside to keep Voice Assistant Cockpit visible (prevents Leaflet focus scroll-down)
+      setTimeout(() => {
+        const parentAside = document.getElementById('map').closest('aside');
+        if (parentAside) parentAside.scrollTop = 0;
+      }, 60);
     }
 
     // Loads order history listing for user
