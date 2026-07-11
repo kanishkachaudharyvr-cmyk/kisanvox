@@ -50,14 +50,17 @@ class SupplyChainOutput(BaseModel):
 
 def check_market_prices(commodity: str) -> dict:
     """
-    Simulates checking live APMC market rates for a specific commodity.
-    Returns the market name, price per quintal, and price trend.
+    Checks live APMC market rates for a specific commodity by querying cms.mandirates.in.
+    Falls back gracefully to high-fidelity mock data if offline or the API fails.
     """
     logger.info(f"[Tool: check_market_prices] Checking rates for commodity: {commodity}")
     comm = commodity.lower().strip()
     
-    # Mock database of APMC market rates
-    market_data = {
+    # Capitalize first letter to match API conventions (e.g. Onion, Tomato, Wheat, Potato, Cotton)
+    api_commodity = commodity.capitalize()
+    
+    # Mock data fallback database
+    market_data_fallback = {
         "onion": {
             "markets": [
                 {"name": "Lasalgaon APMC (Nashik)", "price": 2200, "trend": "Stable"},
@@ -105,14 +108,68 @@ def check_market_prices(commodity: str) -> dict:
         }
     }
     
-    # Default fallback crop lookup if not matches
+    # 1. Try to fetch real live data from the public Agmarknet Mandi Rates API
+    try:
+        import httpx
+        url = "https://cms.mandirates.in/api/daily-prices"
+        params = {
+            "commodity": api_commodity,
+            "per_page": 10
+        }
+        headers = {"User-Agent": "Mozilla/5.0"}
+        logger.info(f"Querying cms.mandirates.in daily-prices for {api_commodity}...")
+        
+        # We disable verification if needed due to potential expired SSL certificates on some agri-sites
+        response = httpx.get(url, params=params, headers=headers, verify=False, timeout=8)
+        
+        if response.status_code == 200:
+            result = response.json()
+            items = result.get("data", [])
+            
+            if items:
+                logger.info(f"Successfully retrieved {len(items)} real daily price records from API.")
+                
+                # Format the markets list from live data
+                markets = []
+                for item in items:
+                    mkt_name = f"{item.get('market_name')} APMC ({item.get('state_name')})"
+                    modal_price = item.get('modal_price')
+                    min_price = item.get('min_price')
+                    max_price = item.get('max_price')
+                    markets.append({
+                        "name": mkt_name,
+                        "price": modal_price,
+                        "trend": f"₹{min_price} - ₹{max_price} Range"
+                    })
+                
+                # Find optimal market (highest modal price)
+                sorted_items = sorted(items, key=lambda x: x.get('modal_price', 0), reverse=True)
+                best_item = sorted_items[0]
+                optimal_market = f"{best_item.get('market_name')} APMC ({best_item.get('state_name')})"
+                optimal_price = best_item.get('modal_price')
+                
+                return {
+                    "status": "success",
+                    "commodity": api_commodity,
+                    "markets": markets[:5],  # Return top 5 records
+                    "optimal_market": optimal_market,
+                    "optimal_price": f"₹{optimal_price}/quintal"
+                }
+            else:
+                logger.warning("Live API query returned empty price records list. Falling back to mock data.")
+        else:
+            logger.warning(f"Live API query failed with status code {response.status_code}. Falling back to mock data.")
+    except Exception as e:
+        logger.error(f"Failed to query live prices API: {e}. Falling back to mock data.")
+
+    # 2. Fallback to mock data database
     selected_crop = "onion"
-    for crop in market_data:
+    for crop in market_data_fallback:
         if crop in comm:
             selected_crop = crop
             break
             
-    data = market_data[selected_crop]
+    data = market_data_fallback[selected_crop]
     return {
         "status": "success",
         "commodity": selected_crop.capitalize(),

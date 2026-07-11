@@ -7,3 +7,5 @@ temp_uploads/
 .vscode/
 venv/
 env/
+
+.vercel
